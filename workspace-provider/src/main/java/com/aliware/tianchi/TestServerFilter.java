@@ -37,7 +37,6 @@ public class TestServerFilter implements Filter, BaseFilter.Listener {
         SystemInfo si = new SystemInfo();
         HardwareAbstractionLayer hal = si.getHardware();
         GlobalMemory memory = hal.getMemory();
-
         appResponse.setAttachment("TestKey", String.valueOf(memory.getVirtualMemory().getVirtualMax()));
     }
 

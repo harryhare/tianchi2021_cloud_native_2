@@ -74,5 +74,6 @@
         <module>workspace-common</module>
         <module>workspace-gateway</module>
         <module>workspace-provider</module>
+        <module>workspace-test</module>
     </modules>
 </project>
