@@ -8,6 +8,7 @@ import org.apache.dubbo.rpc.cluster.LoadBalance;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 负载均衡扩展接口
@@ -17,8 +18,15 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class UserLoadBalance implements LoadBalance {
 
+
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
-        return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
+//        System.out.println("LoadBalance.select");
+//        for (Invoker<T> invoker : invokers) {
+//            //dubbo://172.21.208.1:20880/com.aliware.tianchi.HashInterface?anyhost=true&application=service-provider&category=providers&deprecated=false&dispatcher=game&dubbo=2.0.2&dynamic=true&generic=false&heartbeat=0&interface=com.aliware.tianchi.HashInterface&metadata-service-port=20880&methods=hash&path=com.aliware.tianchi.HashInterface&pid=28840&protocol=dubbo&release=3.0.1&side=provider&threads=500&timeout=5000&timestamp=1634376927976
+//            System.out.println(invoker.getUrl());
+//        }
+        int r=ThreadLocalRandom.current().nextInt(invokers.size());
+        return invokers.get(r);
     }
 }

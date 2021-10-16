@@ -19,6 +19,7 @@ import org.apache.dubbo.rpc.cluster.filter.ClusterFilter;
 public class TestClientClusterFilter implements ClusterFilter, BaseFilter.Listener {
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
+        //System.out.println("TestClientClusterFilter:invoke");
         try {
             Result result = invoker.invoke(invocation);
             return result;
@@ -30,12 +31,13 @@ public class TestClientClusterFilter implements ClusterFilter, BaseFilter.Listen
 
     @Override
     public void onResponse(Result appResponse, Invoker<?> invoker, Invocation invocation) {
-        String value = appResponse.getAttachment("TestKey");
-        System.out.println("TestKey From ClusterFilter, value: " + value);
+        //String value = appResponse.getAttachment("TestKey");
+        //System.out.println("TestKey From ClusterFilter, value: " + value);
+        //System.out.println("TestClientClusterFilter.ok");
     }
 
     @Override
     public void onError(Throwable t, Invoker<?> invoker, Invocation invocation) {
-
+        //System.out.println("TestClientClusterFilter.err");
     }
 }

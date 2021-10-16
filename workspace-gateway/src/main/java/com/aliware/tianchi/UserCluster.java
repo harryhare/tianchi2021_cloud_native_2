@@ -8,6 +8,7 @@ import org.apache.dubbo.rpc.cluster.support.wrapper.AbstractCluster;
 public class UserCluster extends AbstractCluster {
     @Override
     protected <T> AbstractClusterInvoker<T> doJoin(Directory<T> directory) throws RpcException {
+        System.out.println("UserCluster.doJoin");
         return new UserClusterInvoker<>(directory);
     }
 }

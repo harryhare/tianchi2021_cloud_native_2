@@ -23,6 +23,7 @@ import oshi.hardware.HardwareAbstractionLayer;
 public class TestServerFilter implements Filter, BaseFilter.Listener {
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
+        //System.out.println("TestServerFilter invoke");
         try {
             Result result = invoker.invoke(invocation);
             return result;

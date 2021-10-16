@@ -19,6 +19,7 @@ import org.apache.dubbo.rpc.RpcException;
 public class TestClientFilter implements Filter, BaseFilter.Listener {
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
+        //System.out.println("TestClientFilter");
         try {
             Result result = invoker.invoke(invocation);
             return result;
@@ -30,12 +31,15 @@ public class TestClientFilter implements Filter, BaseFilter.Listener {
 
     @Override
     public void onResponse(Result appResponse, Invoker<?> invoker, Invocation invocation) {
-        String value = appResponse.getAttachment("TestKey");
-        System.out.println("TestKey From Filter, value: " + value);
+//        String value = appResponse.getAttachment("TestKey");
+//        System.out.println("TestKey From Filter, value: " + value);
+
+        //System.out.println("TestClientFilter.ok");
     }
 
     @Override
     public void onError(Throwable t, Invoker<?> invoker, Invocation invocation) {
 
+        //System.out.println("TestClientFilter.err");
     }
 }
