@@ -9,6 +9,7 @@ startup.cmd -m standalone
 
 控制台的默认用户名密码：
 http://192.168.56.1:8848/nacos/index.html
+http://127.0.0.1:8848/nacos/index.html
 nacos
 nacos
 
@@ -22,4 +23,17 @@ provider 的运行参数 JVM option
 -Dquota=small
 -Dquota=medium
 -Dquota=large
+
+## 时序
+1 TestClientClusterFilter:invoke before
+	2 UserClusterInvoker.doInvoke.before
+		3 LoadBalance.select.before
+		3 LoadBalance.select.after
+		4 TestClientFilter.invoke.before
+		4 TestClientFilter.invoke.after
+	2 UserClusterInvoker.doInvoke.after	
+1 TestClientClusterFilter:invoke after
+
+5 TestClientFilter.err
+6 TestClientClusterFilter.err
 

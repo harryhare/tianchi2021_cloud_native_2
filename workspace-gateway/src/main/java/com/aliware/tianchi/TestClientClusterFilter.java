@@ -1,5 +1,6 @@
 package com.aliware.tianchi;
 
+import com.aliware.tianchi.util.MyLog;
 import org.apache.dubbo.common.constants.CommonConstants;
 import org.apache.dubbo.common.extension.Activate;
 import org.apache.dubbo.rpc.BaseFilter;
@@ -19,9 +20,10 @@ import org.apache.dubbo.rpc.cluster.filter.ClusterFilter;
 public class TestClientClusterFilter implements ClusterFilter, BaseFilter.Listener {
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
-        //System.out.println("TestClientClusterFilter:invoke");
         try {
+            MyLog.println("TestClientClusterFilter.invoke.before");
             Result result = invoker.invoke(invocation);
+            MyLog.println("TestClientClusterFilter.invoke.after");
             return result;
         } catch (Exception e) {
             throw e;
@@ -33,11 +35,11 @@ public class TestClientClusterFilter implements ClusterFilter, BaseFilter.Listen
     public void onResponse(Result appResponse, Invoker<?> invoker, Invocation invocation) {
         //String value = appResponse.getAttachment("TestKey");
         //System.out.println("TestKey From ClusterFilter, value: " + value);
-        //System.out.println("TestClientClusterFilter.ok");
+        MyLog.println("TestClientClusterFilter.ok");
     }
 
     @Override
     public void onError(Throwable t, Invoker<?> invoker, Invocation invocation) {
-        //System.out.println("TestClientClusterFilter.err");
+        MyLog.println("TestClientClusterFilter.err");
     }
 }

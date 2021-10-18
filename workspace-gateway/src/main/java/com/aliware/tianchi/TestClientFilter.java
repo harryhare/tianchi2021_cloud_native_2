@@ -1,13 +1,19 @@
 package com.aliware.tianchi;
 
+import com.aliware.tianchi.util.MyLog;
 import org.apache.dubbo.common.constants.CommonConstants;
 import org.apache.dubbo.common.extension.Activate;
-import org.apache.dubbo.rpc.BaseFilter;
-import org.apache.dubbo.rpc.Filter;
-import org.apache.dubbo.rpc.Invocation;
-import org.apache.dubbo.rpc.Invoker;
-import org.apache.dubbo.rpc.Result;
-import org.apache.dubbo.rpc.RpcException;
+import org.apache.dubbo.remoting.exchange.Response;
+import org.apache.dubbo.rpc.*;
+
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * 客户端过滤器（选址后）
@@ -19,14 +25,50 @@ import org.apache.dubbo.rpc.RpcException;
 public class TestClientFilter implements Filter, BaseFilter.Listener {
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
-        //System.out.println("TestClientFilter");
         try {
-            Result result = invoker.invoke(invocation);
+            MyLog.println("TestClientFilter.invoke.before");
+//            Map<String, String> attachments = invocation.getAttachments();
+//            attachments.get(Constants.TIMEOUT_KEY);
+            CompletableFuture<Result> f1 = CompletableFuture.supplyAsync(new Supplier<Result>() {
+                @Override
+                public Result get() {
+                    Result r=invoker.invoke(invocation);
+                    try {
+                        r.get();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    }
+                    return r;
+                }
+            });
+            CompletableFuture<Result> f2 = CompletableFuture.supplyAsync(new Supplier<Result>() {
+                @Override
+                public Result get() {
+                    try {
+                        TimeUnit.MILLISECONDS.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    //return new AppResponse();
+
+//                    CompletableFuture b = new CompletableFuture ();
+//                    AsyncRpcResult asyncRpcResult = new AsyncRpcResult(b,invocation);
+//                    asyncRpcResult.setValue(0);
+//                    return asyncRpcResult;
+                    return null;
+                }
+            });
+            CompletableFuture<Object> f = CompletableFuture.anyOf(f1, f2);
+            //CompletableFuture<Object> f = CompletableFuture.anyOf(f1);
+            Result result = (Result) f.get();
+            MyLog.printf("TestClientFilter.invoke.after %s\n", result);
             return result;
         } catch (Exception e) {
-            throw e;
+            //e.printStackTrace();
+            throw new RpcException();
         }
-
     }
 
     @Override
@@ -34,12 +76,11 @@ public class TestClientFilter implements Filter, BaseFilter.Listener {
 //        String value = appResponse.getAttachment("TestKey");
 //        System.out.println("TestKey From Filter, value: " + value);
 
-        //System.out.println("TestClientFilter.ok");
+        MyLog.println("TestClientFilter.ok");
     }
 
     @Override
     public void onError(Throwable t, Invoker<?> invoker, Invocation invocation) {
-
-        //System.out.println("TestClientFilter.err");
+        MyLog.println("TestClientFilter.err");
     }
 }

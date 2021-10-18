@@ -1,9 +1,7 @@
 package com.aliware.tianchi;
 
-import org.apache.dubbo.rpc.Invocation;
-import org.apache.dubbo.rpc.Invoker;
-import org.apache.dubbo.rpc.Result;
-import org.apache.dubbo.rpc.RpcException;
+import com.aliware.tianchi.util.MyLog;
+import org.apache.dubbo.rpc.*;
 import org.apache.dubbo.rpc.cluster.Directory;
 import org.apache.dubbo.rpc.cluster.LoadBalance;
 import org.apache.dubbo.rpc.cluster.support.AbstractClusterInvoker;
@@ -27,11 +25,15 @@ public class UserClusterInvoker<T> extends AbstractClusterInvoker<T> {
 
     @Override
     protected Result doInvoke(Invocation invocation, List<Invoker<T>> invokers, LoadBalance loadbalance) throws RpcException {
-        //System.out.println("UserClusterInvoker.doInvoke");
-        return select(loadbalance, invocation, invokers, null).invoke(invocation)
+        MyLog.println("UserClusterInvoker.doInvoke.before");
+
+        Result re=select(loadbalance, invocation, invokers, null).invoke(invocation)
                 .whenCompleteWithContext((r, t) -> {
                     String value = r.getAttachment("TestKey");
                     logger.info("TestKey From ClusterInvoker, value: " + value);
                 });
+        MyLog.println("UserClusterInvoker.doInvoke.after");
+
+        return re;
     }
 }
