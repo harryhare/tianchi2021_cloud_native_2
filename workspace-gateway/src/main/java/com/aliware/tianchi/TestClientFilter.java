@@ -45,9 +45,9 @@ public class TestClientFilter implements Filter, BaseFilter.Listener {
             System.out.printf("isOneway:%s\n", isOneway);
             System.out.println(RpcUtils.getTimeout(invocation, -1));
 
-            long cur=(System.nanoTime()-start)/1000_000_000;//0-240
-            long timeout=(240-cur)*cur/5000+100;
-            timeout=2500;
+            long cur = (System.nanoTime() - start) / 1000_000_000;//0-240
+            long timeout = (240 - cur) * cur / 5000 + 100;
+            timeout = 2000 * (int)Math.cos(cur / 10. * 2 * Math.PI) + 2100;
             RpcContext.getClientAttachment().setAttachment("timeout", timeout);
             result.get(timeout, TimeUnit.MILLISECONDS);
             MyLog.printf("TestClientFilter.invoke.after %s\n", result);
@@ -56,8 +56,8 @@ public class TestClientFilter implements Filter, BaseFilter.Listener {
             //e.printStackTrace();
             MyLog.println("timeout");
             //throw new RpcException();
-            result.setValue(0);
-            return result;
+            /result.setValue(0);
+            //return new AsyncRpcResult(new CompletableFuture<>(), invocation);
         }
     }
 
