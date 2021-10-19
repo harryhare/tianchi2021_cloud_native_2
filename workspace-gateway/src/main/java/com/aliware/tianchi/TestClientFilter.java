@@ -57,10 +57,11 @@ public class TestClientFilter implements Filter, BaseFilter.Listener {
             //e.printStackTrace();
             MyLog.println("timeout");
             //throw new RpcException();
-            result.setValue(0);
-            result.setException(new RpcException());
+            //result.setValue(0);
+            //result.setException(new RpcException());
             //return new AsyncRpcResult(new CompletableFuture<>(), invocation);
-            return result;
+            throw  new RpcException();
+            //return result;
         }
     }
 
