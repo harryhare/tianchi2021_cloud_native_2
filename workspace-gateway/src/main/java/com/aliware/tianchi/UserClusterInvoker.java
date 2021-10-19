@@ -27,11 +27,11 @@ public class UserClusterInvoker<T> extends AbstractClusterInvoker<T> {
     protected Result doInvoke(Invocation invocation, List<Invoker<T>> invokers, LoadBalance loadbalance) throws RpcException {
         MyLog.println("UserClusterInvoker.doInvoke.before");
 
-        Result re=select(loadbalance, invocation, invokers, null).invoke(invocation)
-                .whenCompleteWithContext((r, t) -> {
-                    String value = r.getAttachment("TestKey");
-                    logger.info("TestKey From ClusterInvoker, value: " + value);
-                });
+        Result re=select(loadbalance, invocation, invokers, null).invoke(invocation);
+//                .whenCompleteWithContext((r, t) -> {
+//                    String value = r.getAttachment("TestKey");
+//                    logger.info("TestKey From ClusterInvoker, value: " + value);
+ //               });
         MyLog.println("UserClusterInvoker.doInvoke.after");
 
         return re;

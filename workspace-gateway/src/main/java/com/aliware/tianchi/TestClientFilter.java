@@ -25,49 +25,20 @@ import java.util.function.Supplier;
 public class TestClientFilter implements Filter, BaseFilter.Listener {
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
+        Result result= invoker.invoke(invocation);
         try {
             MyLog.println("TestClientFilter.invoke.before");
 //            Map<String, String> attachments = invocation.getAttachments();
 //            attachments.get(Constants.TIMEOUT_KEY);
-            CompletableFuture<Result> f1 = CompletableFuture.supplyAsync(new Supplier<Result>() {
-                @Override
-                public Result get() {
-                    Result r=invoker.invoke(invocation);
-                    try {
-                        r.get();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    } catch (ExecutionException e) {
-                        e.printStackTrace();
-                    }
-                    return r;
-                }
-            });
-            CompletableFuture<Result> f2 = CompletableFuture.supplyAsync(new Supplier<Result>() {
-                @Override
-                public Result get() {
-                    try {
-                        TimeUnit.MILLISECONDS.sleep(10);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    //return new AppResponse();
-
-//                    CompletableFuture b = new CompletableFuture ();
-//                    AsyncRpcResult asyncRpcResult = new AsyncRpcResult(b,invocation);
-//                    asyncRpcResult.setValue(0);
-//                    return asyncRpcResult;
-                    return null;
-                }
-            });
-            CompletableFuture<Object> f = CompletableFuture.anyOf(f1, f2);
-            //CompletableFuture<Object> f = CompletableFuture.anyOf(f1);
-            Result result = (Result) f.get();
+            result.get(10, TimeUnit.MILLISECONDS);
             MyLog.printf("TestClientFilter.invoke.after %s\n", result);
             return result;
         } catch (Exception e) {
             //e.printStackTrace();
-            throw new RpcException();
+            MyLog.println("timeout");
+            //throw new RpcException();
+            result.setValue(0);
+            return result;
         }
     }
 

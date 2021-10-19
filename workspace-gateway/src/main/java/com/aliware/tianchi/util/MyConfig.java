@@ -1,5 +1,5 @@
 package com.aliware.tianchi.util;
 
 public class MyConfig {
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
 }
