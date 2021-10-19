@@ -48,6 +48,7 @@ public class TestClientFilter implements Filter, BaseFilter.Listener {
             long cur = (System.nanoTime() - start) / 1000_000_000;//0-240
             long timeout = (240 - cur) * cur / 5000 + 100;
             timeout = 2000 * (int) Math.cos(cur / 10. * 2 * Math.PI) + 2100;
+            timeout = 5000;
             RpcContext.getClientAttachment().setAttachment("timeout", timeout);
             result.get(timeout, TimeUnit.MILLISECONDS);
             MyLog.printf("TestClientFilter.invoke.after %s\n", result);
