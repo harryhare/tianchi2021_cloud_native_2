@@ -30,7 +30,7 @@ public class TestClientFilter implements Filter, BaseFilter.Listener {
             MyLog.println("TestClientFilter.invoke.before");
 //            Map<String, String> attachments = invocation.getAttachments();
 //            attachments.get(Constants.TIMEOUT_KEY);
-            result.get(10, TimeUnit.MILLISECONDS);
+            result.get(100, TimeUnit.MILLISECONDS);
             MyLog.printf("TestClientFilter.invoke.after %s\n", result);
             return result;
         } catch (Exception e) {
