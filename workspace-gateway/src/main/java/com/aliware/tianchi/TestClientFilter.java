@@ -47,7 +47,7 @@ public class TestClientFilter implements Filter, BaseFilter.Listener {
 
             long cur = (System.nanoTime() - start) / 1000_000_000;//0-240
             long timeout = (240 - cur) * cur / 5000 + 100;
-            timeout = 2000 * (int)Math.cos(cur / 10. * 2 * Math.PI) + 2100;
+            timeout = 2000 * (int) Math.cos(cur / 10. * 2 * Math.PI) + 2100;
             RpcContext.getClientAttachment().setAttachment("timeout", timeout);
             result.get(timeout, TimeUnit.MILLISECONDS);
             MyLog.printf("TestClientFilter.invoke.after %s\n", result);
@@ -56,8 +56,10 @@ public class TestClientFilter implements Filter, BaseFilter.Listener {
             //e.printStackTrace();
             MyLog.println("timeout");
             //throw new RpcException();
-            /result.setValue(0);
+            result.setValue(0);
+            result.setException(new RpcException());
             //return new AsyncRpcResult(new CompletableFuture<>(), invocation);
+            return result;
         }
     }
 
