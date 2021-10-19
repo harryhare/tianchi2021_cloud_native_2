@@ -3,6 +3,7 @@ package com.aliware.tianchi;
 import com.aliware.tianchi.util.MyLog;
 import org.apache.dubbo.common.constants.CommonConstants;
 import org.apache.dubbo.common.extension.Activate;
+import org.apache.dubbo.remoting.TimeoutException;
 import org.apache.dubbo.remoting.exchange.Response;
 import org.apache.dubbo.rpc.*;
 
@@ -10,7 +11,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -26,6 +26,7 @@ public class TestClientFilter implements Filter, BaseFilter.Listener {
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         Result result= invoker.invoke(invocation);
+        RpcContext.getClientAttachment().setAttachment("timeout", 10);
         try {
             MyLog.println("TestClientFilter.invoke.before");
 //            Map<String, String> attachments = invocation.getAttachments();
