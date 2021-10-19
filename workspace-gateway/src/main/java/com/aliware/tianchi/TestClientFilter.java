@@ -10,6 +10,7 @@ import org.apache.dubbo.rpc.support.RpcUtils;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
@@ -38,7 +39,7 @@ public class TestClientFilter implements Filter, BaseFilter.Listener {
             System.out.printf("invocation attachment: %s\n", invocation.getAttachments());
             System.out.printf("invocation attr: %s \n", invocation.getAttributes());
             System.out.printf("rpc context: %s \n", RpcContext.getContext());
-            System.out.printf("rpc client context: %s \n", RpcContext.getClientAttachment());
+            System.out.printf("rpc client attachment: %s \n", RpcContext.getClientAttachment().getAttachments());
             System.out.printf("rpc server attachment: %s \n", RpcContext.getServerAttachment());
             System.out.printf("rpc server context: %s \n", RpcContext.getServerContext());
             System.out.printf("rpc service context: %s \n", RpcContext.getServiceContext());
@@ -62,9 +63,19 @@ public class TestClientFilter implements Filter, BaseFilter.Listener {
             //result.setException(new RpcException());
             //return new AsyncRpcResult(new CompletableFuture<>(), invocation);
             //throw  new RpcException();
+//            CompletableFuture b = new CompletableFuture();
+//            AsyncRpcResult asyncRpcResult = new AsyncRpcResult(b, invocation);
+//            //CompletableFuture<Integer> x= CompletableFuture.completedFuture(0);
+//            CompletableFuture<Integer> x = CompletableFuture.supplyAsync(() -> {
+//                throw new CompletionException(new Exception());
+//            });;
+//            asyncRpcResult.setValue(x);
+//            return asyncRpcResult;
             CompletableFuture b = new CompletableFuture();
             AsyncRpcResult asyncRpcResult = new AsyncRpcResult(b, invocation);
-            CompletableFuture<Integer> x= CompletableFuture.completedFuture(0);
+            CompletableFuture<Integer> x = CompletableFuture.supplyAsync(() -> {
+                throw new CompletionException(new Exception());
+            });;
             asyncRpcResult.setValue(x);
             return asyncRpcResult;
         }

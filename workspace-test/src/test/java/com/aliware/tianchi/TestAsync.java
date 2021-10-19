@@ -3,6 +3,7 @@ package com.aliware.tianchi;
 import org.junit.Test;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -47,13 +48,14 @@ public class TestAsync {
         //CompletableFuture<Void> f = CompletableFuture.allOf(f1, f2, f3);
         f.get();
     }
+
     @Test
     public void first_with_arg() throws ExecutionException, InterruptedException {
-        CompletableFuture<String> f1 = getData(1,"AAA");
-        CompletableFuture<String> f2 = getData(2,"BBB");
-        CompletableFuture<String> f3 = getData(3,"BBB");
+        CompletableFuture<String> f1 = getData(1, "AAA");
+        CompletableFuture<String> f2 = getData(2, "BBB");
+        CompletableFuture<String> f3 = getData(3, "BBB");
         CompletableFuture<Object> f = CompletableFuture.anyOf(f1, f2, f3);
-        String r=(String)f.get();
+        String r = (String) f.get();
         System.out.println(r);
     }
 
@@ -75,5 +77,15 @@ public class TestAsync {
         future.get();
     }
 
-
+    @Test
+    public void test10() {
+        //CompletableFuture<Integer> x = CompletableFuture.completedFuture(0);
+        CompletableFuture<Integer> x = CompletableFuture.supplyAsync(() -> {
+            throw new CompletionException(new Exception());
+        });;
+        x.whenComplete((value,t)->{
+            System.out.println(value);
+            System.out.println(t);
+        });
+    }
 }
