@@ -28,46 +28,46 @@ public class TestClientFilter implements Filter, BaseFilter.Listener {
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
-        CompletableFuture b = new CompletableFuture();
-        AsyncRpcResult asyncRpcResult = new AsyncRpcResult(b, invocation);
-        CompletableFuture<Integer> x= CompletableFuture.completedFuture(0);
-        asyncRpcResult.setValue(x);
-        return asyncRpcResult;
-//        Result result = invoker.invoke(invocation);
-//        try {
-//            MyLog.println("TestClientFilter.invoke.before");
-//            boolean isAsync = RpcUtils.isAsync(invoker.getUrl(), invocation);
-//            boolean isOneway = RpcUtils.isOneway(invoker.getUrl(), invocation);
-//            System.out.println(invoker.getUrl());
-//            System.out.printf("invocation attachment: %s\n", invocation.getAttachments());
-//            System.out.printf("invocation attr: %s \n", invocation.getAttributes());
-//            System.out.printf("rpc context: %s \n", RpcContext.getContext());
-//            System.out.printf("rpc client context: %s \n", RpcContext.getClientAttachment());
-//            System.out.printf("rpc server attachment: %s \n", RpcContext.getServerAttachment());
-//            System.out.printf("rpc server context: %s \n", RpcContext.getServerContext());
-//            System.out.printf("rpc service context: %s \n", RpcContext.getServiceContext());
-//            System.out.printf("isAsync:%s\n", isAsync);
-//            System.out.printf("isOneway:%s\n", isOneway);
-//            System.out.println(RpcUtils.getTimeout(invocation, -1));
-//
-//            long cur = (System.nanoTime() - start) / 1000_000_000;//0-240
-//            long timeout = (240 - cur) * cur / 5000 + 100;
-//            timeout = 2000 * (int) Math.cos(cur / 10. * 2 * Math.PI) + 2100;
-//            timeout = 5000;
-//            RpcContext.getClientAttachment().setAttachment("timeout", timeout);
-//            result.get(timeout, TimeUnit.MILLISECONDS);
-//            MyLog.printf("TestClientFilter.invoke.after %s\n", result);
-//            return result;
-//        } catch (Exception e) {
-//            //e.printStackTrace();
-//            MyLog.println("timeout");
-//            //throw new RpcException();
-//            //result.setValue(0);
-//            //result.setException(new RpcException());
-//            //return new AsyncRpcResult(new CompletableFuture<>(), invocation);
-//            throw  new RpcException();
-//            //return result;
-//        }
+
+        Result result = invoker.invoke(invocation);
+        try {
+            MyLog.println("TestClientFilter.invoke.before");
+            boolean isAsync = RpcUtils.isAsync(invoker.getUrl(), invocation);
+            boolean isOneway = RpcUtils.isOneway(invoker.getUrl(), invocation);
+            System.out.println(invoker.getUrl());
+            System.out.printf("invocation attachment: %s\n", invocation.getAttachments());
+            System.out.printf("invocation attr: %s \n", invocation.getAttributes());
+            System.out.printf("rpc context: %s \n", RpcContext.getContext());
+            System.out.printf("rpc client context: %s \n", RpcContext.getClientAttachment());
+            System.out.printf("rpc server attachment: %s \n", RpcContext.getServerAttachment());
+            System.out.printf("rpc server context: %s \n", RpcContext.getServerContext());
+            System.out.printf("rpc service context: %s \n", RpcContext.getServiceContext());
+            System.out.printf("isAsync:%s\n", isAsync);
+            System.out.printf("isOneway:%s\n", isOneway);
+            System.out.println(RpcUtils.getTimeout(invocation, -1));
+
+            long cur = (System.nanoTime() - start) / 1000_000_000;//0-240
+            long timeout = (240 - cur) * cur / 5000 + 100;
+            timeout = 2000 * (int) Math.cos(cur / 10. * 2 * Math.PI) + 2100;
+            timeout = 5000;
+            RpcContext.getClientAttachment().setAttachment("timeout", timeout);
+            result.get(timeout, TimeUnit.MILLISECONDS);
+            MyLog.printf("TestClientFilter.invoke.after %s\n", result);
+            return result;
+        } catch (Exception e) {
+            //e.printStackTrace();
+            MyLog.println("timeout");
+            //throw new RpcException();
+            //result.setValue(0);
+            //result.setException(new RpcException());
+            //return new AsyncRpcResult(new CompletableFuture<>(), invocation);
+            //throw  new RpcException();
+            CompletableFuture b = new CompletableFuture();
+            AsyncRpcResult asyncRpcResult = new AsyncRpcResult(b, invocation);
+            CompletableFuture<Integer> x= CompletableFuture.completedFuture(0);
+            asyncRpcResult.setValue(x);
+            return asyncRpcResult;
+        }
     }
 
     @Override

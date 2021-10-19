@@ -87,3 +87,12 @@ provider 的运行参数 JVM option
 //            result.setValue(CompletableFuture.completedFuture(0));
 //            result.setValue(0);
 ```
+
+## return
+```text
+        CompletableFuture b = new CompletableFuture();
+        AsyncRpcResult asyncRpcResult = new AsyncRpcResult(b, invocation);
+        CompletableFuture<Integer> x= CompletableFuture.completedFuture(0);
+        asyncRpcResult.setValue(x);
+        return asyncRpcResult;
+```
