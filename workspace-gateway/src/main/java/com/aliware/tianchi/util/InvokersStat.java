@@ -50,7 +50,7 @@ public class InvokersStat {
     private static InvokersStat instance = null;
 
     private <T> void init_internal(List<Invoker<T>> invokers) {
-        System.out.println("init_internal");
+        LOGGER.info("init_internal");
         for (int i = 0; i < 3; i++) {
             a[i] = new InvokerStat();
         }
@@ -74,7 +74,7 @@ public class InvokersStat {
     }
 
     static synchronized public <T> void init(List<Invoker<T>> invokers) {
-        System.out.println("init");
+        LOGGER.info("init");
         if (instance != null) {
             return;
         }
@@ -114,7 +114,7 @@ public class InvokersStat {
     }
 
     public void print(int index) {
-        System.out.printf("data,%d,%d,%d,%d\n", index, a[0].concurrent.get(), a[1].concurrent.get(), a[2].concurrent.get());
+        LOGGER.info("=>,{},{},{},{}\n", index, a[0].concurrent.get(), a[1].concurrent.get(), a[2].concurrent.get());
     }
 
     public void invoke(int id) {
