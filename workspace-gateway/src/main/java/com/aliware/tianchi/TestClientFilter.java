@@ -4,10 +4,13 @@ import com.aliware.tianchi.util.InvokersStat;
 import com.aliware.tianchi.util.MyLog;
 import org.apache.dubbo.common.constants.CommonConstants;
 import org.apache.dubbo.common.extension.Activate;
+import org.apache.dubbo.remoting.RemotingException;
 import org.apache.dubbo.remoting.TimeoutException;
 import org.apache.dubbo.remoting.exchange.Response;
 import org.apache.dubbo.rpc.*;
 import org.apache.dubbo.rpc.support.RpcUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -26,6 +29,8 @@ import java.util.function.Supplier;
  */
 @Activate(group = CommonConstants.CONSUMER)
 public class TestClientFilter implements Filter, BaseFilter.Listener {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestClientFilter.class);
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
@@ -61,6 +66,13 @@ public class TestClientFilter implements Filter, BaseFilter.Listener {
     @Override
     public void onError(Throwable t, Invoker<?> invoker, Invocation invocation) {
         MyLog.println("TestClientFilter.err");
+        if (t instanceof TimeoutException) {
+            LOGGER.info("err:timeout");
+        } else if (t instanceof RemotingException) {
+            LOGGER.info("err:server down");
+        } else {
+            LOGGER.info("err:" + t.getMessage());
+        }
         InvokersStat s = InvokersStat.getInstance();
         if (s != null) {
             s.err(invoker);
