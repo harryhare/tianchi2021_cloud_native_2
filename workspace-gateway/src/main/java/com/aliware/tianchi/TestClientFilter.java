@@ -30,6 +30,7 @@ public class TestClientFilter implements Filter, BaseFilter.Listener {
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
 
+        RpcContext.getClientAttachment().setAttachment("timeout", 100);
         Result result = invoker.invoke(invocation);
         return result;
 //        try {
