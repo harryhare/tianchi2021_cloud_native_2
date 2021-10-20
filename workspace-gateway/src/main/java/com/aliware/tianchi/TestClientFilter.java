@@ -1,5 +1,6 @@
 package com.aliware.tianchi;
 
+import com.aliware.tianchi.util.InvokersStat;
 import com.aliware.tianchi.util.MyLog;
 import org.apache.dubbo.common.constants.CommonConstants;
 import org.apache.dubbo.common.extension.Activate;
@@ -25,74 +26,44 @@ import java.util.function.Supplier;
  */
 @Activate(group = CommonConstants.CONSUMER)
 public class TestClientFilter implements Filter, BaseFilter.Listener {
-    static long start = System.nanoTime();
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
-
         RpcContext.getClientAttachment().setAttachment("timeout", 100);
         Result result = invoker.invoke(invocation);
+        InvokersStat s = InvokersStat.getInstance();
+        if (s != null) {
+            long start = System.nanoTime();
+            s.invoke(invoker);
+//            result.whenCompleteWithContext((r, t) -> {
+//                int duration = (int) (System.currentTimeMillis() - start);
+//                if (r.hasException()) {
+//                    s.err(invoker);
+//                } else {
+//                    s.ok(invoker);
+//                }
+//            });
+        }
         return result;
-//        try {
-//            MyLog.println("TestClientFilter.invoke.before");
-//            boolean isAsync = RpcUtils.isAsync(invoker.getUrl(), invocation);
-//            boolean isOneway = RpcUtils.isOneway(invoker.getUrl(), invocation);
-//            System.out.println(invoker.getUrl());
-//            System.out.printf("invocation attachment: %s\n", invocation.getAttachments());
-//            System.out.printf("invocation attr: %s \n", invocation.getAttributes());
-//            System.out.printf("rpc context: %s \n", RpcContext.getContext());
-//            System.out.printf("rpc client attachment: %s \n", RpcContext.getClientAttachment().getAttachments());
-//            System.out.printf("rpc server attachment: %s \n", RpcContext.getServerAttachment());
-//            System.out.printf("rpc server context: %s \n", RpcContext.getServerContext());
-//            System.out.printf("rpc service context: %s \n", RpcContext.getServiceContext());
-//            System.out.printf("isAsync:%s\n", isAsync);
-//            System.out.printf("isOneway:%s\n", isOneway);
-//            System.out.println(RpcUtils.getTimeout(invocation, -1));
-//
-//            long cur = (System.nanoTime() - start) / 1000_000_000;//0-240
-//            long timeout = (240 - cur) * cur / 5000 + 100;
-//            timeout = 2000 * (int) Math.cos(cur / 10. * 2 * Math.PI) + 2100;
-//            timeout = 5000;
-//            RpcContext.getClientAttachment().setAttachment("timeout", timeout);
-//            result.get(timeout, TimeUnit.MILLISECONDS);
-//            MyLog.printf("TestClientFilter.invoke.after %s\n", result);
-//            return result;
-//        } catch (Exception e) {
-//            //e.printStackTrace();
-//            MyLog.println("timeout");
-//            //throw new RpcException();
-//            //result.setValue(0);
-//            //result.setException(new RpcException());
-//            //return new AsyncRpcResult(new CompletableFuture<>(), invocation);
-//            //throw  new RpcException();
-////            CompletableFuture b = new CompletableFuture();
-////            AsyncRpcResult asyncRpcResult = new AsyncRpcResult(b, invocation);
-////            //CompletableFuture<Integer> x= CompletableFuture.completedFuture(0);
-////            CompletableFuture<Integer> x = CompletableFuture.supplyAsync(() -> {
-////                throw new CompletionException(new Exception());
-////            });;
-////            asyncRpcResult.setValue(x);
-////            return asyncRpcResult;
-//            CompletableFuture b = new CompletableFuture();
-//            AsyncRpcResult asyncRpcResult = new AsyncRpcResult(b, invocation);
-//            CompletableFuture<Integer> x = CompletableFuture.supplyAsync(() -> {
-//                throw new CompletionException(new Exception());
-//            });;
-//            asyncRpcResult.setValue(x);
-//            return asyncRpcResult;
-//        }
     }
 
     @Override
     public void onResponse(Result appResponse, Invoker<?> invoker, Invocation invocation) {
 //        String value = appResponse.getAttachment("TestKey");
 //        System.out.println("TestKey From Filter, value: " + value);
-
         MyLog.println("TestClientFilter.ok");
+        InvokersStat s = InvokersStat.getInstance();
+        if (s != null) {
+            s.ok(invoker);
+        }
     }
 
     @Override
     public void onError(Throwable t, Invoker<?> invoker, Invocation invocation) {
         MyLog.println("TestClientFilter.err");
+        InvokersStat s = InvokersStat.getInstance();
+        if (s != null) {
+            s.err(invoker);
+        }
     }
 }
