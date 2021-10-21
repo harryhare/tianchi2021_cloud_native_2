@@ -31,7 +31,7 @@ public class InvokersStat {
         }
 
         int get_rtt() {
-            return last_rtt_sum.get() / rtt_sum_num ;//微秒 1e-6
+            return last_rtt_sum.get() / rtt_sum_num;//微秒 1e-6
         }
 
         void invoke() {
@@ -116,14 +116,16 @@ public class InvokersStat {
                 p[i] = 10;
             }
         }
-
-        int[] s = new int[3];
-        s[0] = p[0];
-        s[1] = p[1] + s[0];
-        s[2] = p[2] + s[1];
-        int r = ThreadLocalRandom.current().nextInt(s[2]);
-        for (int i = 0; i < 2; i++) {
+        MyLog.printf("weight: %d, %d, %d\n", p[0], p[1], p[2]);
+        int[] s = new int[4];
+        s[0] = 0;
+        s[1] = p[0] + s[0];
+        s[2] = p[1] + s[1];
+        s[3] = p[2] + s[2];
+        int r = ThreadLocalRandom.current().nextInt(s[3]);
+        for (int i = 2; i >= 0; i--) {
             if (r > s[i]) {
+                MyLog.printf("choose: %d\n", i);
                 return i;
             }
         }

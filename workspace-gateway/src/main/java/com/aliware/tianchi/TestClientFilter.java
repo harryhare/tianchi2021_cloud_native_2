@@ -41,7 +41,7 @@ public class TestClientFilter implements Filter, BaseFilter.Listener {
             long start = System.nanoTime();
             s.invoke(invoker);
             result.whenCompleteWithContext((r, t) -> {
-                int duration = (int) (System.currentTimeMillis() - start)/1000;
+                int duration = (int) (System.nanoTime() - start)/1000;
                 if (t == null) {
                     MyLog.printf("result.whenCompleteWithContext: %d\n", duration);
                     s.ok(invoker, duration);
