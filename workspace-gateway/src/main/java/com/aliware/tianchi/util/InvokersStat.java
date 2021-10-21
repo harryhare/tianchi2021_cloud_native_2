@@ -57,7 +57,8 @@ public class InvokersStat {
         }
 
         int get_time_out() {
-            return get_rtt() * 2 / 1000;//ms 1e-3
+            //return get_rtt() * 2 / 1000;//ms 1e-3
+            return 100;
 //            int x = err_timeout_acc.get();
 //            int y = get_rtt();
 //            if (x > 10) {
