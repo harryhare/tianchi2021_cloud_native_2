@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class InvokersStat {
     static public class InvokerStat {
         private final int rtt_array_len = 4096;
-        private final int rtt_sum_num = 20;// rtt_sum_num<<rtt_array_len
+        private final int rtt_sum_num = 32;// rtt_sum_num<<rtt_array_len
         private int[] response_time = new int[rtt_array_len]; //微秒 1e-6
         AtomicInteger response_index = new AtomicInteger(0);
         AtomicInteger last_rtt_sum = new AtomicInteger(0);//10次rtt的和
@@ -19,15 +19,51 @@ public class InvokersStat {
         AtomicInteger concurrent = new AtomicInteger(0); // 瞬时
         AtomicInteger err_all = new AtomicInteger(0);// 累加，阶段清零
         AtomicInteger err_timeout = new AtomicInteger(0);// 累加, 阶段清零
-        AtomicInteger err_offline = new AtomicInteger(0);// 累加，succ清零
+        AtomicInteger err_offline_acc = new AtomicInteger(0);// 累加，succ清零
+        AtomicInteger err_timeout_acc = new AtomicInteger(0);// 累加，succ清零
         public double rtt_period = 0;// 阶段平均
 
-        int weight() {
-            int o = err_offline.get();
+        int weightByRtt() {
+            int o = err_offline_acc.get();
+            int c = concurrent.get();
             if (o > 0) {
-                return 0;
+                if (c > 0) {
+                    return 0;
+                }
+                return 10;
             }
-            return estimate.get() - concurrent.get();
+            int rtt = Math.max(last_rtt_sum.get(), 1000);
+            int x = (int) (1000_000 * rtt_sum_num / rtt);
+            if (x < 10) {
+                x = 10;
+            }
+            return x;
+        }
+
+        int weightByConcurrent() {
+            int o = err_offline_acc.get();
+            int c = concurrent.get();
+            if (o > 0) {
+                if (c > 0) {
+                    return 0;
+                }
+                return 10;
+            }
+            int x = estimate.get() - concurrent.get();
+            if (x <= 10) {
+                x = 10;
+            }
+            return x;
+        }
+
+        int get_time_out() {
+            return get_rtt() * 2 / 1000;//ms 1e-3
+//            int x = err_timeout_acc.get();
+//            int y = get_rtt();
+//            if (x > 10) {
+//                return 5000;
+//            }
+//            return (1 << x) * y * 2;
         }
 
         int get_rtt() {
@@ -40,7 +76,8 @@ public class InvokersStat {
 
         void ok(int d) {
             concurrent.getAndDecrement();
-            err_offline.set(0);
+            err_offline_acc.set(0);
+            err_timeout_acc.set(0);
             int i = response_index.getAndIncrement() % rtt_array_len;
             int j = (i + rtt_array_len - rtt_sum_num) % rtt_array_len;
             response_time[i] = d;
@@ -54,8 +91,9 @@ public class InvokersStat {
             err_all.getAndIncrement();
             if (t == ErrorType.TIMEOUT) {
                 err_timeout.getAndIncrement();
+                err_timeout_acc.getAndIncrement();
             } else if (t == ErrorType.OFFLINE) {
-                err_offline.getAndIncrement();
+                err_offline_acc.getAndIncrement();
             }
             //estimate.getAndAdd(-2);
         }
@@ -111,10 +149,8 @@ public class InvokersStat {
     public int chooseByWeight() {
         int[] p = new int[3];
         for (int i = 0; i < 3; i++) {
-            p[i] = a[i].weight();
-            if (p[i] < 10) {
-                p[i] = 10;
-            }
+            //p[i] = a[i].weightByConcurrent();
+            p[i] = a[i].weightByRtt();
         }
         MyLog.printf("weight: %d, %d, %d\n", p[0], p[1], p[2]);
         int[] s = new int[4];
@@ -144,7 +180,7 @@ public class InvokersStat {
         LOGGER.info("=>,{},{},{},{},{},{},{},{},{},{},{},{},{}", index,
                 a[0].concurrent.get(), a[1].concurrent.get(), a[2].concurrent.get(),
                 a[0].err_timeout.get(), a[1].err_timeout.get(), a[2].err_timeout.get(),
-                a[0].err_offline.get(), a[1].err_offline.get(), a[2].err_offline.get(),
+                a[0].err_offline_acc.get(), a[1].err_offline_acc.get(), a[2].err_offline_acc.get(),
                 a[0].get_rtt(), a[1].get_rtt(), a[2].get_rtt()
         );
     }
@@ -163,6 +199,10 @@ public class InvokersStat {
 
     private static String get_invoker_key(Invoker<?> invoker) {
         return invoker.getUrl().getHost();
+    }
+
+    public int get_timout(Invoker<?> invoker) {
+        return m.get(get_invoker_key(invoker)).get_time_out();
     }
 
     public void invoke(Invoker<?> invoker) {

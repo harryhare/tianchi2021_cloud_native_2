@@ -9,6 +9,8 @@ import org.apache.dubbo.rpc.Invoker;
 import org.apache.dubbo.rpc.Result;
 import org.apache.dubbo.rpc.RpcException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import oshi.SystemInfo;
 import oshi.hardware.GlobalMemory;
 import oshi.hardware.HardwareAbstractionLayer;
@@ -21,6 +23,8 @@ import oshi.hardware.HardwareAbstractionLayer;
  */
 @Activate(group = CommonConstants.PROVIDER)
 public class TestServerFilter implements Filter, BaseFilter.Listener {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestServerFilter.class);
+
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         //System.out.println("TestServerFilter invoke");

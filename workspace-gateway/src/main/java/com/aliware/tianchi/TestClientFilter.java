@@ -34,14 +34,18 @@ public class TestClientFilter implements Filter, BaseFilter.Listener {
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
-        RpcContext.getClientAttachment().setAttachment("timeout", 100);
-        Result result = invoker.invoke(invocation);
         InvokersStat s = InvokersStat.getInstance();
+        if (s != null) {
+            RpcContext.getClientAttachment().setAttachment("timeout", s.get_timout(invoker));
+        } else {
+            RpcContext.getClientAttachment().setAttachment("timeout", 100);
+        }
+        Result result = invoker.invoke(invocation);
         if (s != null) {
             long start = System.nanoTime();
             s.invoke(invoker);
             result.whenCompleteWithContext((r, t) -> {
-                int duration = (int) (System.nanoTime() - start)/1000;
+                int duration = (int) (System.nanoTime() - start) / 1000;
                 if (t == null) {
                     MyLog.printf("result.whenCompleteWithContext: %d\n", duration);
                     s.ok(invoker, duration);
