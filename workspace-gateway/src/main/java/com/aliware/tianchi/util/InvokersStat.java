@@ -107,8 +107,8 @@ public class InvokersStat {
 
         int[] s = new int[3];
         s[0] = p[0];
-        s[1] = p[0] + s[1];
-        s[2] = p[1] + s[2];
+        s[1] = p[1] + s[0];
+        s[2] = p[2] + s[1];
         int r = ThreadLocalRandom.current().nextInt(s[2]);
         for (int i = 0; i < 2; i++) {
             if (r > s[i]) {
