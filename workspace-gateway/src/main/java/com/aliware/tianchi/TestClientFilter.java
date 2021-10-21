@@ -40,14 +40,26 @@ public class TestClientFilter implements Filter, BaseFilter.Listener {
         if (s != null) {
             long start = System.nanoTime();
             s.invoke(invoker);
-//            result.whenCompleteWithContext((r, t) -> {
-//                int duration = (int) (System.currentTimeMillis() - start);
-//                if (r.hasException()) {
-//                    s.err(invoker);
-//                } else {
-//                    s.ok(invoker);
-//                }
-//            });
+            result.whenCompleteWithContext((r, t) -> {
+                int duration = (int) (System.currentTimeMillis() - start)/1000;
+                if (t == null) {
+                    MyLog.printf("result.whenCompleteWithContext: %d\n", duration);
+                    s.ok(invoker, duration);
+                } else {
+                    Throwable cause = t.getCause();
+                    InvokersStat.ErrorType type = InvokersStat.ErrorType.OTHER;
+                    if (cause instanceof TimeoutException) {
+                        LOGGER.info("err:timeout");
+                        type = InvokersStat.ErrorType.TIMEOUT;
+                    } else if (cause instanceof RemotingException) {
+                        LOGGER.info("err:server down");
+                        type = InvokersStat.ErrorType.OFFLINE;
+                    } else {
+                        LOGGER.info("err:" + cause);
+                    }
+                    s.err(invoker, type);
+                }
+            });
         }
         return result;
     }
@@ -57,29 +69,29 @@ public class TestClientFilter implements Filter, BaseFilter.Listener {
 //        String value = appResponse.getAttachment("TestKey");
 //        System.out.println("TestKey From Filter, value: " + value);
         MyLog.println("TestClientFilter.ok");
-        InvokersStat s = InvokersStat.getInstance();
-        if (s != null) {
-            s.ok(invoker);
-        }
+//        InvokersStat s = InvokersStat.getInstance();
+//        if (s != null) {
+//            s.ok(invoker);
+//        }
     }
 
     @Override
     public void onError(Throwable t, Invoker<?> invoker, Invocation invocation) {
         MyLog.println("TestClientFilter.err");
-        InvokersStat s = InvokersStat.getInstance();
-        if (s != null) {
-            Throwable cause = t.getCause();
-            InvokersStat.ErrorType type = InvokersStat.ErrorType.OTHER;
-            if (cause instanceof TimeoutException) {
-                LOGGER.info("err:timeout");
-                type = InvokersStat.ErrorType.TIMEOUT;
-            } else if (cause instanceof RemotingException) {
-                LOGGER.info("err:server down");
-                type = InvokersStat.ErrorType.OFFLINE;
-            } else {
-                LOGGER.info("err:" + cause);
-            }
-            s.err(invoker, type);
-        }
+//        InvokersStat s = InvokersStat.getInstance();
+//        if (s != null) {
+//            Throwable cause = t.getCause();
+//            InvokersStat.ErrorType type = InvokersStat.ErrorType.OTHER;
+//            if (cause instanceof TimeoutException) {
+//                LOGGER.info("err:timeout");
+//                type = InvokersStat.ErrorType.TIMEOUT;
+//            } else if (cause instanceof RemotingException) {
+//                LOGGER.info("err:server down");
+//                type = InvokersStat.ErrorType.OFFLINE;
+//            } else {
+//                LOGGER.info("err:" + cause);
+//            }
+//            s.err(invoker, type);
+//        }
     }
 }

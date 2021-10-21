@@ -29,7 +29,8 @@ public class UserLoadBalance implements LoadBalance {
             inited = true;
         }
         MyLog.println("LoadBalance.select.before");
-        int r = ThreadLocalRandom.current().nextInt(invokers.size());
+        //int r = ThreadLocalRandom.current().nextInt(invokers.size());
+        int r = InvokersStat.getInstance().chooseByWeight();
         MyLog.println("LoadBalance.select.after");
         return invokers.get(r);
     }
