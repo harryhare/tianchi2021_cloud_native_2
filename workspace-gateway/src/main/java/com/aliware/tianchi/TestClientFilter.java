@@ -66,16 +66,20 @@ public class TestClientFilter implements Filter, BaseFilter.Listener {
     @Override
     public void onError(Throwable t, Invoker<?> invoker, Invocation invocation) {
         MyLog.println("TestClientFilter.err");
-        if (t instanceof TimeoutException) {
-            LOGGER.info("err:timeout");
-        } else if (t instanceof RemotingException) {
-            LOGGER.info("err:server down");
-        } else {
-            LOGGER.info("err:" + t.getMessage());
-        }
         InvokersStat s = InvokersStat.getInstance();
         if (s != null) {
-            s.err(invoker);
+            Throwable cause = t.getCause();
+            InvokersStat.ErrorType type = InvokersStat.ErrorType.OTHER;
+            if (cause instanceof TimeoutException) {
+                LOGGER.info("err:timeout");
+                type = InvokersStat.ErrorType.TIMEOUT;
+            } else if (cause instanceof RemotingException) {
+                LOGGER.info("err:server down");
+                type = InvokersStat.ErrorType.OFFLINE;
+            } else {
+                LOGGER.info("err:" + cause);
+            }
+            s.err(invoker, type);
         }
     }
 }

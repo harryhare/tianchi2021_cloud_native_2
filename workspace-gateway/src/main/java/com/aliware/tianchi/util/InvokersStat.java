@@ -10,13 +10,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class InvokersStat {
     static public class InvokerStat {
+        private int[] response_time = new int[2000];
+        AtomicInteger response_index = new AtomicInteger(0);
         AtomicInteger estimate = new AtomicInteger(500);//估计容量，瞬时
         AtomicInteger concurrent = new AtomicInteger(0); // 瞬时
-        AtomicInteger err_total = new AtomicInteger(0); // 累加
-        AtomicInteger err_period = new AtomicInteger(0); //阶段累加
+        AtomicInteger err_all = new AtomicInteger(0);// 累加，阶段清零
+        AtomicInteger err_timeout = new AtomicInteger(0);// 累加, 阶段清零
+        AtomicInteger err_offline = new AtomicInteger(0);// 累加，succ清零
         public double rtt_period = 0;// 阶段平均
 
-        int remain() {
+        int weight() {
+            int o = err_offline.get();
+            if (o > 0) {
+                return 0;
+            }
             return estimate.get() - concurrent.get();
         }
 
@@ -24,20 +31,26 @@ public class InvokersStat {
             concurrent.getAndIncrement();
         }
 
-        void ok() {
+        void ok(long d) {
             concurrent.getAndDecrement();
+            err_offline.set(0);
             //estimate.getAndAdd(2);
         }
 
-        void err() {
+        void err(ErrorType t) {
             concurrent.getAndDecrement();
-            err_total.getAndIncrement();
-            err_period.getAndIncrement();
+            err_all.getAndIncrement();
+            if (t == ErrorType.TIMEOUT) {
+                err_timeout.getAndIncrement();
+            } else if (t == ErrorType.OFFLINE) {
+                err_offline.getAndIncrement();
+            }
             //estimate.getAndAdd(-2);
         }
 
-        public void new_period() {
-            err_period.set(0);
+        void new_period() {
+            err_all.set(0);
+            err_timeout.set(0);
         }
     }
 
@@ -86,7 +99,7 @@ public class InvokersStat {
     public int getByWeight() {
         int[] p = new int[3];
         for (int i = 0; i < 3; i++) {
-            p[i] = a[i].remain();
+            p[i] = a[i].weight();
             if (p[i] < 10) {
                 p[i] = 10;
             }
@@ -106,15 +119,19 @@ public class InvokersStat {
     }
 
     public void period() {
+        period++;
+        print(period);
         for (int i = 0; i < 3; i++) {
             a[i].new_period();
         }
-        period++;
-        print(period);
     }
 
     public void print(int index) {
-        LOGGER.info("=>,{},{},{},{}\n", index, a[0].concurrent.get(), a[1].concurrent.get(), a[2].concurrent.get());
+        LOGGER.info("=>,{},{},{},{},{},{},{},{},{},{}", index,
+                a[0].concurrent.get(), a[1].concurrent.get(), a[2].concurrent.get(),
+                a[0].err_timeout.get(), a[1].err_timeout.get(), a[2].err_timeout.get(),
+                a[0].err_offline.get(), a[1].err_offline.get(), a[2].err_offline.get()
+        );
     }
 
     public void invoke(int id) {
@@ -122,11 +139,11 @@ public class InvokersStat {
     }
 
     public void ok(int id) {
-        a[id].ok();
+        a[id].ok(0);
     }
 
-    public void err(int id) {
-        a[id].err();
+    public void err(int id, ErrorType t) {
+        a[id].err(t);
     }
 
     private static String get_invoker_key(Invoker<?> invoker) {
@@ -138,11 +155,16 @@ public class InvokersStat {
     }
 
     public void ok(Invoker<?> invoker) {
-        m.get(get_invoker_key(invoker)).ok();
+        m.get(get_invoker_key(invoker)).ok(0);
     }
 
+    public enum ErrorType {
+        OTHER,
+        TIMEOUT,
+        OFFLINE,
+    }
 
-    public void err(Invoker<?> invoker) {
-        m.get(get_invoker_key(invoker)).err();
+    public void err(Invoker<?> invoker, ErrorType t) {
+        m.get(get_invoker_key(invoker)).err(t);
     }
 }
