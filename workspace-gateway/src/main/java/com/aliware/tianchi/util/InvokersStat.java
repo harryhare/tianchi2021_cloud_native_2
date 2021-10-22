@@ -111,6 +111,7 @@ public class InvokersStat {
     private static long start = System.nanoTime();
     private InvokerStat[] a = new InvokerStat[3];
     private Map<String, InvokerStat> m = new HashMap<>();
+    private Map<String, Integer> m2 = new HashMap<>();
     private static InvokersStat instance = null;
 
     private <T> void init_internal(List<Invoker<T>> invokers) {
@@ -124,6 +125,7 @@ public class InvokersStat {
             LOGGER.info(invokers.get(i).getUrl().getHost());
             String key = get_invoker_key(invokers.get(i));
             m.put(key, a[i]);
+            m2.put(key, i);
         }
         timer.schedule(new TimerTask() {
             @Override
@@ -169,6 +171,10 @@ public class InvokersStat {
         return 0;
     }
 
+    public int chooseByQueue() {
+        return WeightedQueue.get();
+    }
+
     public void period() {
         period++;
         print(period);
@@ -177,7 +183,7 @@ public class InvokersStat {
         }
     }
 
-    public void print(int index) {
+    private void print(int index) {
         LOGGER.info("=>,{},{},{},{},{},{},{},{},{},{},{},{},{}", index,
                 a[0].concurrent.get(), a[1].concurrent.get(), a[2].concurrent.get(),
                 a[0].err_timeout.get(), a[1].err_timeout.get(), a[2].err_timeout.get(),
@@ -211,7 +217,9 @@ public class InvokersStat {
     }
 
     public void ok(Invoker<?> invoker, int duration) {
-        m.get(get_invoker_key(invoker)).ok(duration);
+        int i = m2.get(get_invoker_key(invoker));
+        WeightedQueue.ok(i, duration);
+        a[i].ok(duration);
     }
 
     public enum ErrorType {
@@ -221,6 +229,8 @@ public class InvokersStat {
     }
 
     public void err(Invoker<?> invoker, ErrorType t) {
+        int i = m2.get(get_invoker_key(invoker));
+        WeightedQueue.err();
         m.get(get_invoker_key(invoker)).err(t);
     }
 }
