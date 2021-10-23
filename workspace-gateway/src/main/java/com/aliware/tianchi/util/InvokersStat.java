@@ -18,7 +18,8 @@ public class InvokersStat {
         AtomicInteger estimate = new AtomicInteger(500);//估计容量，瞬时
         AtomicInteger concurrent = new AtomicInteger(0); // 瞬时
         AtomicInteger err_all = new AtomicInteger(0);// 累加，阶段清零
-        AtomicInteger err_timeout = new AtomicInteger(0);// 累加, 阶段清零
+        AtomicInteger suc_all = new AtomicInteger(0);// 累加
+        AtomicInteger err_timeout = new AtomicInteger(0);// 累加
         AtomicInteger err_offline_acc = new AtomicInteger(0);// 累加，succ清零
         AtomicInteger err_timeout_acc = new AtomicInteger(0);// 累加，succ清零
         public double rtt_period = 0;// 阶段平均
@@ -77,6 +78,7 @@ public class InvokersStat {
 
         void ok(int d) {
             concurrent.getAndDecrement();
+            suc_all.getAndIncrement();
             err_offline_acc.set(0);
             err_timeout_acc.set(0);
             int i = response_index.getAndIncrement() % rtt_array_len;
@@ -110,8 +112,8 @@ public class InvokersStat {
     private static int period = 0;
     private static long start = System.nanoTime();
     private InvokerStat[] a = new InvokerStat[3];
-    private Map<String, InvokerStat> m = new HashMap<>();
-    private Map<String, Integer> m2 = new HashMap<>();
+    private Map<Integer, InvokerStat> m = new HashMap<>();
+    private Map<Integer, Integer> m2 = new HashMap<>();
     private static InvokersStat instance = null;
 
     private <T> void init_internal(List<Invoker<T>> invokers) {
@@ -123,7 +125,7 @@ public class InvokersStat {
             //dubbo://172.21.208.1:20880/com.aliware.tianchi.HashInterface?anyhost=true&application=service-provider&category=providers&deprecated=false&dispatcher=game&dubbo=2.0.2&dynamic=true&generic=false&heartbeat=0&interface=com.aliware.tianchi.HashInterface&metadata-service-port=20880&methods=hash&path=com.aliware.tianchi.HashInterface&pid=28840&protocol=dubbo&release=3.0.1&side=provider&threads=500&timeout=5000&timestamp=1634376927976
             LOGGER.info(invokers.get(i).getUrl().toString());
             LOGGER.info(invokers.get(i).getUrl().getHost());
-            String key = get_invoker_key(invokers.get(i));
+            int key = get_invoker_key(invokers.get(i));
             m.put(key, a[i]);
             m2.put(key, i);
         }
@@ -184,10 +186,11 @@ public class InvokersStat {
     }
 
     private void print(int index) {
-        LOGGER.info("=>,{},{},{},{},{},{},{},{},{},{},{},{},{},{}", index,
+        LOGGER.info("=>,{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}", index,
                 a[0].concurrent.get(), a[1].concurrent.get(), a[2].concurrent.get(),
                 a[0].err_timeout.get(), a[1].err_timeout.get(), a[2].err_timeout.get(),
                 a[0].err_offline_acc.get(), a[1].err_offline_acc.get(), a[2].err_offline_acc.get(),
+                a[0].suc_all.get(),a[1].suc_all.get(),a[3].suc_all.get(),
                 a[0].get_rtt(), a[1].get_rtt(), a[2].get_rtt(),
                 WeightedQueue.q.size()
         );
@@ -205,8 +208,8 @@ public class InvokersStat {
         a[id].err(t);
     }
 
-    private static String get_invoker_key(Invoker<?> invoker) {
-        return invoker.getUrl().getHost();
+    private static int get_invoker_key(Invoker<?> invoker) {
+        return invoker.getUrl().getPort();
     }
 
     public int get_timout(Invoker<?> invoker) {

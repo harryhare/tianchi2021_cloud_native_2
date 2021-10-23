@@ -72,7 +72,8 @@ public class TestClientFilter implements Filter, BaseFilter.Listener {
     public void onResponse(Result appResponse, Invoker<?> invoker, Invocation invocation) {
 //        String value = appResponse.getAttachment("TestKey");
 //        System.out.println("TestKey From Filter, value: " + value);
-        MyLog.println("TestClientFilter.ok");
+
+        MyLog.printf("TestClientFilter.ok.%s\n", invoker.getUrl().getHost());
 //        InvokersStat s = InvokersStat.getInstance();
 //        if (s != null) {
 //            s.ok(invoker);

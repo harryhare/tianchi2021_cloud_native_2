@@ -10,6 +10,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class WeightedQueue {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WeightedQueue.class);
+
     static private class WorkRequest {
         final int index;
         final Double latency;
@@ -36,24 +37,32 @@ public class WeightedQueue {
         }
     }
 
+
     public static int get() {
         WorkRequest r = q.pollFirst();
         if (r != null) {
+            MyLog.printf("invoke:queue out %d\n", r.index);
             return r.index;
         }
         return ThreadLocalRandom.current().nextInt(3);
     }
 
-    public static void ok(int i, int duration,boolean good) {//d 微秒 1e-6s
+    public static void ok(int i, int duration, boolean good) {//d 微秒 1e-6s
         if (good) {//3ms
             q.pollLast();
             q.add(new WorkRequest(i, duration));
+            MyLog.printf("ok:queue in %d\n", i);
         }
-        q.add(new WorkRequest(i, 1000));
+        q.add(new WorkRequest(i, duration));
+        MyLog.printf("ok:queue in %d\n", i);
     }
 
     public static void err(int i) {
-        i=(i+ThreadLocalRandom.current().nextInt(2)+1)%3;
+        i = (i + ThreadLocalRandom.current().nextInt(2) + 1) % 3;
         q.add(new WorkRequest(i, 1000));
+//        WorkRequest r = q.pollFirst();
+//        q.add(r);
+//        q.add(new WorkRequest(r.index, (int) Math.floor(r.latency)));
+//        MyLog.printf("err:queue in %d\n", i);
     }
 }
