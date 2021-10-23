@@ -209,7 +209,10 @@ public class InvokersStat {
     }
 
     public int get_timout(Invoker<?> invoker) {
-        return m.get(get_invoker_key(invoker)).get_time_out();
+        int t0 = a[0].get_time_out();
+        int t1 = a[1].get_time_out();
+        int t2 = a[2].get_time_out();
+        return Math.min(Math.min(t0, t1), t2);
     }
 
     public void invoke(Invoker<?> invoker) {
