@@ -24,7 +24,7 @@ public class WeightedQueue {
                 return o1.latency.compareTo(o2.latency);
             }
         });
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 200; i++) {
             q.add(new WorkRequest(0, 100));
             q.add(new WorkRequest(1, 100));
             q.add(new WorkRequest(2, 100));
@@ -47,7 +47,8 @@ public class WeightedQueue {
         q.add(new WorkRequest(i, 10));
     }
 
-    public static void err() {
-
+    public static void err(int i) {
+        i=(i+ThreadLocalRandom.current().nextInt(2)+1)%3;
+        q.add(new WorkRequest(i, 10));
     }
 }

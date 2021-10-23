@@ -233,7 +233,7 @@ public class InvokersStat {
 
     public void err(Invoker<?> invoker, ErrorType t) {
         int i = m2.get(get_invoker_key(invoker));
-        WeightedQueue.err();
+        WeightedQueue.err(i);
         m.get(get_invoker_key(invoker)).err(t);
     }
 }
