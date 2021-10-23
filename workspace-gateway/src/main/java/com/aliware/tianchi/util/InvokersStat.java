@@ -219,13 +219,30 @@ public class InvokersStat {
         return t;
     }
 
+    public int get_avg_rtt() {
+        int sum = 0;
+        int n = 0;
+        for (int i = 0; i < 3; i++) {
+            if (a[i].err_offline_acc.get() == 0) {
+                int ti = a[i].get_time_out();
+                sum += ti;
+                n++;
+            }
+        }
+        if (n == 0) {
+            return 1000;
+        }
+        return sum / n;
+    }
+
     public void invoke(Invoker<?> invoker) {
         m.get(get_invoker_key(invoker)).invoke();
     }
 
     public void ok(Invoker<?> invoker, int duration) {
         int i = m2.get(get_invoker_key(invoker));
-        WeightedQueue.ok(i, duration);
+        boolean good = duration < get_avg_rtt();
+        WeightedQueue.ok(i, duration, good);
         a[i].ok(duration);
     }
 

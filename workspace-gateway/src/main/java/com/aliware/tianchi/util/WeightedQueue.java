@@ -25,9 +25,9 @@ public class WeightedQueue {
             }
         });
         for (int i = 0; i < 200; i++) {
-            q.add(new WorkRequest(0, 100));
-            q.add(new WorkRequest(1, 100));
-            q.add(new WorkRequest(2, 100));
+            q.add(new WorkRequest(0, 1000));
+            q.add(new WorkRequest(1, 1000));
+            q.add(new WorkRequest(2, 1000));
         }
     }
 
@@ -39,16 +39,16 @@ public class WeightedQueue {
         return ThreadLocalRandom.current().nextInt(3);
     }
 
-    public static void ok(int i, int duration) {//d 微秒 1e-6s
-        if (duration < 3000) {//3ms
+    public static void ok(int i, int duration,boolean good) {//d 微秒 1e-6s
+        if (good) {//3ms
             q.pollLast();
             q.add(new WorkRequest(i, duration));
         }
-        q.add(new WorkRequest(i, 10));
+        q.add(new WorkRequest(i, 1000));
     }
 
     public static void err(int i) {
         i=(i+ThreadLocalRandom.current().nextInt(2)+1)%3;
-        q.add(new WorkRequest(i, 10));
+        q.add(new WorkRequest(i, 1000));
     }
 }
