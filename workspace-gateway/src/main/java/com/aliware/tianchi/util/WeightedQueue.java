@@ -1,10 +1,15 @@
 package com.aliware.tianchi.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Comparator;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class WeightedQueue {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(WeightedQueue.class);
     static private class WorkRequest {
         final int index;
         final Double latency;
