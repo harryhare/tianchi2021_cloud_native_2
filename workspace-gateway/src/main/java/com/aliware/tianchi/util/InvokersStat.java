@@ -209,10 +209,14 @@ public class InvokersStat {
     }
 
     public int get_timout(Invoker<?> invoker) {
-        int t0 = a[0].get_time_out();
-        int t1 = a[1].get_time_out();
-        int t2 = a[2].get_time_out();
-        return Math.min(Math.min(t0, t1), t2);
+        int t = 100;
+        for (int i = 0; i < 3; i++) {
+            int ti = a[i].get_time_out();
+            if (a[i].err_offline_acc.get() == 0) {
+                t = Math.min(ti, t);
+            }
+        }
+        return t;
     }
 
     public void invoke(Invoker<?> invoker) {
