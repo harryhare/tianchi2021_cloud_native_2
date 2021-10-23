@@ -186,11 +186,12 @@ public class InvokersStat {
     }
 
     private void print(int index) {
+
         LOGGER.info("=>,{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}", index,
                 a[0].concurrent.get(), a[1].concurrent.get(), a[2].concurrent.get(),
                 a[0].err_timeout.get(), a[1].err_timeout.get(), a[2].err_timeout.get(),
                 a[0].err_offline_acc.get(), a[1].err_offline_acc.get(), a[2].err_offline_acc.get(),
-                a[0].suc_all.get(),a[1].suc_all.get(),a[3].suc_all.get(),
+                a[0].suc_all.get(),a[1].suc_all.get(),a[2].suc_all.get(),
                 a[0].get_rtt(), a[1].get_rtt(), a[2].get_rtt(),
                 WeightedQueue.q.size()
         );
