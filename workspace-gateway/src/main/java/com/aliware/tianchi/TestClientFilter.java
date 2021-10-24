@@ -36,7 +36,7 @@ public class TestClientFilter implements Filter, BaseFilter.Listener {
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         InvokersStat s = InvokersStat.getInstance();
         if (s != null) {
-            RpcContext.getClientAttachment().setAttachment("timeout", s.get_timout(invoker));
+            RpcContext.getClientAttachment().setAttachment("timeout", s.get_timout(invoker)/1000);
         } else {
             RpcContext.getClientAttachment().setAttachment("timeout", 100);
         }

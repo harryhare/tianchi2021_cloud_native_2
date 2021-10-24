@@ -28,9 +28,10 @@ public class InvokersStat {
         public double rtt_period = 0;// 阶段平均
 
         int weightByRtt() {
-            int o = offline_acc.get();
+            int offline = offline_acc.get();
+            int timeout = timeout_acc.get();
             int c = concurrent.get();
-            if (o > 0) {
+            if (offline > 0) {
                 if (c > 0) {
                     return 0;
                 }
@@ -61,7 +62,14 @@ public class InvokersStat {
         }
 
         int get_time_out() {
-            return get_rtt() * 2 / 1000;//ms 1e-3
+            return get_rtt() * 2;
+//            int timeout = timeout_per_second.get();
+//            int suc = suc_per_second.get();
+//            int c = concurrent.get();
+//            if (suc == 0) {
+//                suc = 1;
+//            }
+//            return (int) (1.0 * get_rtt() * (suc + timeout) / suc * (600. / c));//ms 1e-6
             //return 100;
 //            int x = timeout_acc.get();
 //            int y = get_rtt();
@@ -174,7 +182,7 @@ public class InvokersStat {
         s[3] = p[2] + s[2];
         int r = ThreadLocalRandom.current().nextInt(s[3]);
         for (int i = 2; i >= 0; i--) {
-            if (r > s[i]) {
+            if (r >= s[i]) {
                 MyLog.printf("choose: %d\n", i);
                 return i;
             }
@@ -243,7 +251,7 @@ public class InvokersStat {
         int n = 0;
         for (int i = 0; i < 3; i++) {
             if (a[i].offline_acc.get() == 0) {
-                int ti = a[i].get_time_out();
+                int ti = a[i].get_time_out(); //1e-6
                 sum += ti;
                 n++;
             }
@@ -258,9 +266,9 @@ public class InvokersStat {
         m.get(get_invoker_key(invoker)).invoke();
     }
 
-    public void ok(Invoker<?> invoker, int duration) {
+    public void ok(Invoker<?> invoker, int duration) {//1e-6
         int i = m2.get(get_invoker_key(invoker));
-        boolean good = duration < get_avg_rtt();
+        boolean good = duration < get_avg_rtt();//1e-6
         WeightedQueue.ok(i, duration, good);
         a[i].ok(duration);
     }
@@ -273,7 +281,7 @@ public class InvokersStat {
 
     public void err(Invoker<?> invoker, ErrorType t) {
         int i = m2.get(get_invoker_key(invoker));
-        WeightedQueue.err(i,t);
+        WeightedQueue.err(i, t);
         m.get(get_invoker_key(invoker)).err(t);
     }
 }
