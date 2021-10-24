@@ -17,15 +17,18 @@ public class InvokersStat {
         AtomicInteger last_rtt_sum = new AtomicInteger(0);//10次rtt的和
         AtomicInteger estimate = new AtomicInteger(500);//估计容量，瞬时
         AtomicInteger concurrent = new AtomicInteger(0); // 瞬时
-        AtomicInteger err_all = new AtomicInteger(0);// 累加，阶段清零
-        AtomicInteger suc_all = new AtomicInteger(0);// 累加
-        AtomicInteger err_timeout = new AtomicInteger(0);// 累加
-        AtomicInteger err_offline_acc = new AtomicInteger(0);// 累加，succ清零
-        AtomicInteger err_timeout_acc = new AtomicInteger(0);// 累加，succ清零
+        AtomicInteger suc_total = new AtomicInteger(0);// 累加
+        AtomicInteger err_total = new AtomicInteger(0);// 累加
+        AtomicInteger offline_acc = new AtomicInteger(0);// 累加，succ清零
+        AtomicInteger timeout_acc = new AtomicInteger(0);// 累加，succ清零
+        AtomicInteger suc_per_second = new AtomicInteger(0);// 每秒清零
+        AtomicInteger err_per_second = new AtomicInteger(0);// 每秒清零
+        AtomicInteger timeout_per_senond = new AtomicInteger(0);// 每秒清零
+        AtomicInteger offline_per_senond = new AtomicInteger(0);// 每秒清零
         public double rtt_period = 0;// 阶段平均
 
         int weightByRtt() {
-            int o = err_offline_acc.get();
+            int o = offline_acc.get();
             int c = concurrent.get();
             if (o > 0) {
                 if (c > 0) {
@@ -42,7 +45,7 @@ public class InvokersStat {
         }
 
         int weightByConcurrent() {
-            int o = err_offline_acc.get();
+            int o = offline_acc.get();
             int c = concurrent.get();
             if (o > 0) {
                 if (c > 0) {
@@ -60,7 +63,7 @@ public class InvokersStat {
         int get_time_out() {
             return get_rtt() * 2 / 1000;//ms 1e-3
             //return 100;
-//            int x = err_timeout_acc.get();
+//            int x = timeout_acc.get();
 //            int y = get_rtt();
 //            if (x > 10) {
 //                return 5000;
@@ -78,9 +81,11 @@ public class InvokersStat {
 
         void ok(int d) {
             concurrent.getAndDecrement();
-            suc_all.getAndIncrement();
-            err_offline_acc.set(0);
-            err_timeout_acc.set(0);
+            suc_total.getAndIncrement();
+            suc_per_second.getAndIncrement();
+            offline_acc.set(0);
+            timeout_acc.set(0);
+            // 更新rtt
             int i = response_index.getAndIncrement() % rtt_array_len;
             int j = (i + rtt_array_len - rtt_sum_num) % rtt_array_len;
             response_time[i] = d;
@@ -91,19 +96,23 @@ public class InvokersStat {
 
         void err(ErrorType t) {
             concurrent.getAndDecrement();
-            err_all.getAndIncrement();
+            err_total.getAndIncrement();
+            err_per_second.getAndIncrement();
             if (t == ErrorType.TIMEOUT) {
-                err_timeout.getAndIncrement();
-                err_timeout_acc.getAndIncrement();
+                timeout_acc.getAndIncrement();
+                timeout_per_senond.getAndIncrement();
             } else if (t == ErrorType.OFFLINE) {
-                err_offline_acc.getAndIncrement();
+                offline_acc.getAndIncrement();
+                offline_per_senond.getAndIncrement();
             }
             //estimate.getAndAdd(-2);
         }
 
         void new_period() {
-            err_all.set(0);
-            err_timeout.set(0);
+            suc_per_second.set(0);
+            err_per_second.set(0);
+            timeout_per_senond.set(0);
+            offline_per_senond.set(0);
         }
     }
 
@@ -187,11 +196,16 @@ public class InvokersStat {
 
     private void print(int index) {
 
-        LOGGER.info("=>,{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}", index,
+        LOGGER.info("=>,{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}", index,
+                a[0].suc_total.get(), a[1].suc_total.get(), a[2].suc_total.get(),
+                a[0].err_total.get(), a[1].err_total.get(), a[2].err_total.get(),
+                a[0].timeout_acc.get(), a[1].timeout_acc.get(), a[2].timeout_acc.get(),
+                a[0].offline_acc.get(), a[1].offline_acc.get(), a[2].offline_acc.get(),
+                a[0].suc_per_second.get(), a[1].suc_per_second.get(), a[2].suc_per_second.get(),
+                a[0].err_per_second.get(), a[1].err_per_second.get(), a[2].err_per_second.get(),
+                a[0].timeout_per_senond.get(), a[1].timeout_per_senond.get(), a[2].timeout_per_senond.get(),
+                a[0].offline_per_senond.get(), a[1].offline_per_senond.get(), a[2].offline_per_senond.get(),
                 a[0].concurrent.get(), a[1].concurrent.get(), a[2].concurrent.get(),
-                a[0].err_timeout.get(), a[1].err_timeout.get(), a[2].err_timeout.get(),
-                a[0].err_offline_acc.get(), a[1].err_offline_acc.get(), a[2].err_offline_acc.get(),
-                a[0].suc_all.get(),a[1].suc_all.get(),a[2].suc_all.get(),
                 a[0].get_rtt(), a[1].get_rtt(), a[2].get_rtt(),
                 WeightedQueue.q.size()
         );
@@ -217,7 +231,7 @@ public class InvokersStat {
         int t = 1000;
         for (int i = 0; i < 3; i++) {
             int ti = a[i].get_time_out();
-            if (a[i].err_offline_acc.get() == 0) {
+            if (a[i].offline_acc.get() == 0) {
                 t = Math.min(ti, t);
             }
         }
@@ -228,7 +242,7 @@ public class InvokersStat {
         int sum = 0;
         int n = 0;
         for (int i = 0; i < 3; i++) {
-            if (a[i].err_offline_acc.get() == 0) {
+            if (a[i].offline_acc.get() == 0) {
                 int ti = a[i].get_time_out();
                 sum += ti;
                 n++;
