@@ -23,8 +23,8 @@ public class InvokersStat {
         AtomicInteger timeout_acc = new AtomicInteger(0);// 累加，succ清零
         AtomicInteger suc_per_second = new AtomicInteger(0);// 每秒清零
         AtomicInteger err_per_second = new AtomicInteger(0);// 每秒清零
-        AtomicInteger timeout_per_senond = new AtomicInteger(0);// 每秒清零
-        AtomicInteger offline_per_senond = new AtomicInteger(0);// 每秒清零
+        AtomicInteger timeout_per_second = new AtomicInteger(0);// 每秒清零
+        AtomicInteger offline_per_second = new AtomicInteger(0);// 每秒清零
         public double rtt_period = 0;// 阶段平均
 
         int weightByRtt() {
@@ -100,10 +100,10 @@ public class InvokersStat {
             err_per_second.getAndIncrement();
             if (t == ErrorType.TIMEOUT) {
                 timeout_acc.getAndIncrement();
-                timeout_per_senond.getAndIncrement();
+                timeout_per_second.getAndIncrement();
             } else if (t == ErrorType.OFFLINE) {
                 offline_acc.getAndIncrement();
-                offline_per_senond.getAndIncrement();
+                offline_per_second.getAndIncrement();
             }
             //estimate.getAndAdd(-2);
         }
@@ -111,8 +111,8 @@ public class InvokersStat {
         void new_period() {
             suc_per_second.set(0);
             err_per_second.set(0);
-            timeout_per_senond.set(0);
-            offline_per_senond.set(0);
+            timeout_per_second.set(0);
+            offline_per_second.set(0);
         }
     }
 
@@ -203,8 +203,8 @@ public class InvokersStat {
                 a[0].offline_acc.get(), a[1].offline_acc.get(), a[2].offline_acc.get(),
                 a[0].suc_per_second.get(), a[1].suc_per_second.get(), a[2].suc_per_second.get(),
                 a[0].err_per_second.get(), a[1].err_per_second.get(), a[2].err_per_second.get(),
-                a[0].timeout_per_senond.get(), a[1].timeout_per_senond.get(), a[2].timeout_per_senond.get(),
-                a[0].offline_per_senond.get(), a[1].offline_per_senond.get(), a[2].offline_per_senond.get(),
+                a[0].timeout_per_second.get(), a[1].timeout_per_second.get(), a[2].timeout_per_second.get(),
+                a[0].offline_per_second.get(), a[1].offline_per_second.get(), a[2].offline_per_second.get(),
                 a[0].concurrent.get(), a[1].concurrent.get(), a[2].concurrent.get(),
                 a[0].get_rtt(), a[1].get_rtt(), a[2].get_rtt(),
                 WeightedQueue.q.size()
@@ -273,7 +273,7 @@ public class InvokersStat {
 
     public void err(Invoker<?> invoker, ErrorType t) {
         int i = m2.get(get_invoker_key(invoker));
-        WeightedQueue.err(i);
+        WeightedQueue.err(i,t);
         m.get(get_invoker_key(invoker)).err(t);
     }
 }

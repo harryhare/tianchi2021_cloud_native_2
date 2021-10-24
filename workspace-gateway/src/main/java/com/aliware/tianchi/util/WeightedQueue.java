@@ -57,9 +57,13 @@ public class WeightedQueue {
         MyLog.printf("ok:queue in %d\n", i);
     }
 
-    public static void err(int i) {
-        i = (i + ThreadLocalRandom.current().nextInt(2) + 1) % 3;
-        q.add(new WorkRequest(i, 1000));
+    public static void err(int i, InvokersStat.ErrorType t) {
+        if (t == InvokersStat.ErrorType.TIMEOUT) {
+            q.add(new WorkRequest(i, 1000));
+        } else {
+            i = (i + ThreadLocalRandom.current().nextInt(2) + 1) % 3;
+            q.add(new WorkRequest(i, 1000));
+        }
 //        WorkRequest r = q.pollFirst();
 //        q.add(r);
 //        q.add(new WorkRequest(r.index, (int) Math.floor(r.latency)));
