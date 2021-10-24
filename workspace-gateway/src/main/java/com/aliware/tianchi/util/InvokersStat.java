@@ -181,6 +181,10 @@ public class InvokersStat {
         s[2] = p[1] + s[1];
         s[3] = p[2] + s[2];
         int r = ThreadLocalRandom.current().nextInt(s[3]);
+        if (s[3] == 0) {
+            LOGGER.info("get by weight with zero weight {},{},{}", p[0], p[1], p[2]);
+            return ThreadLocalRandom.current().nextInt(3);
+        }
         for (int i = 2; i >= 0; i--) {
             if (r >= s[i]) {
                 MyLog.printf("choose: %d\n", i);
