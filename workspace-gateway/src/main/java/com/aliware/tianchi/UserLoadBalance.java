@@ -30,8 +30,8 @@ public class UserLoadBalance implements LoadBalance {
         }
         MyLog.println("LoadBalance.select.before");
         //int r = ThreadLocalRandom.current().nextInt(invokers.size());
-        //int r = InvokersStat.getInstance().chooseByWeight();
-        int r = InvokersStat.getInstance().chooseByQueue();
+        int r = InvokersStat.getInstance().chooseByWeight();
+        //int r = InvokersStat.getInstance().chooseByQueue();
         MyLog.printf("LoadBalance.select.%s\n",invokers.get(r).getUrl().getHost());
         MyLog.println("LoadBalance.select.after");
         return invokers.get(r);
