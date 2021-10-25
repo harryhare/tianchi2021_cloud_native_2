@@ -39,7 +39,7 @@ public class InvokersStat {
                 }
                 return 10;
             }
-            int x = (int) (suc_ratio * 10000);
+            int x = (int) (suc_ratio * 1000);
 
             if (x < 10) {
                 x = 10;
@@ -149,7 +149,7 @@ public class InvokersStat {
         void new_period() {
             int suc = suc_per_second.get();
             int err = err_per_second.get();
-            suc_ratio = 1.0 * (suc + 10) / (suc + err + 10);
+            suc_ratio = 1.0 * (suc + 10) / ( err + 10);
             suc_per_second.set(0);
             err_per_second.set(0);
             timeout_per_second.set(0);
