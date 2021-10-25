@@ -37,8 +37,8 @@ public class InvokersStat {
                 }
                 return 10;
             }
-            int rtt = Math.max(last_rtt_sum.get(), 1000);
-            int x = (int) (1000_000 * rtt_sum_num / rtt);
+            int rtt = Math.max(last_rtt_sum.get(), 1000);//1ms
+            int x = (int) (1000_000 * rtt_sum_num / rtt);//大概10000左右
             if (x < 10) {
                 x = 10;
             }
@@ -179,17 +179,24 @@ public class InvokersStat {
 
     // 按照估计的容量的剩余比例分配
     public int chooseByWeight() {
+        int[] s = {0, 0, 0, 0};
         int[] p = new int[3];
-        for (int i = 0; i < 3; i++) {
-            //p[i] = a[i].weightByConcurrent();
-            p[i] = a[i].weightByRtt();
+        for (int retry = 0; retry < 1000 && s[3] == 0; retry++) {
+            for (int i = 0; i < 3; i++) {
+                //p[i] = a[i].weightByConcurrent();
+                p[i] = a[i].weightByRtt();
+            }
+            MyLog.printf("weight: %d, %d, %d\n", p[0], p[1], p[2]);
+            s[0] = 0;
+            s[1] = p[0] + s[0];
+            s[2] = p[1] + s[1];
+            s[3] = p[2] + s[2];
+            try {
+                Thread.sleep(1);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-        MyLog.printf("weight: %d, %d, %d\n", p[0], p[1], p[2]);
-        int[] s = new int[4];
-        s[0] = 0;
-        s[1] = p[0] + s[0];
-        s[2] = p[1] + s[1];
-        s[3] = p[2] + s[2];
         if (s[3] == 0) {
             LOGGER.info("get by weight with zero weight {},{},{}", p[0], p[1], p[2]);
             return ThreadLocalRandom.current().nextInt(3);
