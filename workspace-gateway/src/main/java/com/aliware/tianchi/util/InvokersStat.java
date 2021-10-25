@@ -240,7 +240,7 @@ public class InvokersStat {
     }
 
     public int get_timout(Invoker<?> invoker) {
-        int t = 1000;
+        int t = 1000000;
         for (int i = 0; i < 3; i++) {
             int ti = a[i].get_time_out();
             if (a[i].offline_acc.get() == 0) {
