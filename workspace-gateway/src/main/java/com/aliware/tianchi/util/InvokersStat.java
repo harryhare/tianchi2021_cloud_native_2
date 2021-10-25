@@ -32,7 +32,7 @@ public class InvokersStat {
             int offline = offline_acc.get();
             int timeout = timeout_acc.get();
             int c = concurrent.get();
-            if (offline > 0) {
+            if (offline > 0 || timeout > 0) {
                 if (c > 0) {
                     return 0;
                 }
