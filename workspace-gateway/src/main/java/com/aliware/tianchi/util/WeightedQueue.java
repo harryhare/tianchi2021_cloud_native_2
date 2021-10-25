@@ -31,9 +31,9 @@ public class WeightedQueue {
             }
         });
         for (int i = 0; i < 200; i++) {
-            q.add(new WorkRequest(0, 1000));
-            q.add(new WorkRequest(1, 1000));
-            q.add(new WorkRequest(2, 1000));
+            q.add(new WorkRequest(0, 100000));//100ms
+            q.add(new WorkRequest(1, 100000));//100ms
+            q.add(new WorkRequest(2, 100000));//100ms
         }
     }
 
@@ -54,15 +54,15 @@ public class WeightedQueue {
             MyLog.printf("ok:queue in %d\n", i);
         }
         q.add(new WorkRequest(i, duration));
-        MyLog.printf("ok:queue in %d\n", i);
+        MyLog.printf("ok:queue in %d\n", i + 1000);
     }
 
     public static void err(int i, InvokersStat.ErrorType t) {
         if (t == InvokersStat.ErrorType.TIMEOUT) {
-            q.add(new WorkRequest(i, 1000));
+            q.add(new WorkRequest(i, 100000));//100ms
         } else {
             i = (i + ThreadLocalRandom.current().nextInt(2) + 1) % 3;
-            q.add(new WorkRequest(i, 1000));
+            q.add(new WorkRequest(i, 100000));//100ms
         }
 //        WorkRequest r = q.pollFirst();
 //        q.add(r);
