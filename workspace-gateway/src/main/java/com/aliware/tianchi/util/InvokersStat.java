@@ -26,13 +26,32 @@ public class InvokersStat {
         AtomicInteger err_per_second = new AtomicInteger(0);// 每秒清零
         AtomicInteger timeout_per_second = new AtomicInteger(0);// 每秒清零
         AtomicInteger offline_per_second = new AtomicInteger(0);// 每秒清零
+        public double suc_ratio = 0;
         public double rtt_period = 0;// 阶段平均
+
+        int weightByTimeoutRatio() {
+            int offline = offline_acc.get();
+            int timeout = timeout_acc.get();
+            int c = concurrent.get();
+            if (offline > 0) { // || timeout > 10 不行
+                if (c > 0) {
+                    return 0;
+                }
+                return 10;
+            }
+            int x = (int) (suc_ratio * 1000);
+
+            if (x < 10) {
+                x = 10;
+            }
+            return x;
+        }
 
         int weightByRtt() {
             int offline = offline_acc.get();
             int timeout = timeout_acc.get();
             int c = concurrent.get();
-            if (offline > 0 || timeout > 10) {
+            if (offline > 0) { // || timeout > 10 不行
                 if (c > 0) {
                     return 0;
                 }
@@ -128,6 +147,9 @@ public class InvokersStat {
         }
 
         void new_period() {
+            int suc = suc_per_second.get();
+            int err = err_per_second.get();
+            suc_ratio = (suc + 10) / (suc + err + 10);
             suc_per_second.set(0);
             err_per_second.set(0);
             timeout_per_second.set(0);
@@ -184,7 +206,7 @@ public class InvokersStat {
         int[] p = new int[3];
         for (int i = 0; i < 3; i++) {
             //p[i] = a[i].weightByConcurrent();
-            p[i] = a[i].weightByRtt();
+            p[i] = a[i].weightByTimeoutRatio();
         }
         MyLog.printf("weight: %d, %d, %d\n", p[0], p[1], p[2]);
         s[0] = 0;
