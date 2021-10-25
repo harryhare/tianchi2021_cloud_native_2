@@ -1,6 +1,7 @@
 package com.aliware.tianchi.util;
 
 import org.apache.dubbo.rpc.Invoker;
+import org.apache.dubbo.rpc.RpcException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +39,7 @@ public class InvokersStat {
                 return 10;
             }
             int rtt = Math.max(last_rtt_sum.get(), 1000);//1ms
-            int x = (int) (1000_000 * rtt_sum_num / rtt);//大概10000左右
+            int x = (int) (1000_000 * rtt_sum_num / rtt);//大概10_000左右
             if (x < 10) {
                 x = 10;
             }
@@ -72,7 +73,7 @@ public class InvokersStat {
             if (c <= 0) {
                 c = 1;
             }
-            int t = (int) (1.0 * get_rtt() * (suc + timeout) / suc * (200. / c));//ms 1e-6
+            int t = (int) (1.0 * get_rtt() * (suc + timeout) / suc * (400. / c));//ms 1e-6
             if (t > 100000) {
                 t = 100000;//100ms
             }
@@ -178,28 +179,23 @@ public class InvokersStat {
     }
 
     // 按照估计的容量的剩余比例分配
-    public int chooseByWeight() {
+    public int chooseByWeight() throws RpcException {
         int[] s = {0, 0, 0, 0};
         int[] p = new int[3];
-        for (int retry = 0; retry < 1000 && s[3] == 0; retry++) {
-            for (int i = 0; i < 3; i++) {
-                //p[i] = a[i].weightByConcurrent();
-                p[i] = a[i].weightByRtt();
-            }
-            MyLog.printf("weight: %d, %d, %d\n", p[0], p[1], p[2]);
-            s[0] = 0;
-            s[1] = p[0] + s[0];
-            s[2] = p[1] + s[1];
-            s[3] = p[2] + s[2];
-            try {
-                Thread.sleep(1);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        for (int i = 0; i < 3; i++) {
+            //p[i] = a[i].weightByConcurrent();
+            p[i] = a[i].weightByRtt();
         }
+        MyLog.printf("weight: %d, %d, %d\n", p[0], p[1], p[2]);
+        s[0] = 0;
+        s[1] = p[0] + s[0];
+        s[2] = p[1] + s[1];
+        s[3] = p[2] + s[2];
+
         if (s[3] == 0) {
-            LOGGER.info("get by weight with zero weight {},{},{}", p[0], p[1], p[2]);
-            return ThreadLocalRandom.current().nextInt(3);
+            throw new RpcException();
+//            LOGGER.info("get by weight with zero weight {},{},{}", p[0], p[1], p[2]);
+//            return ThreadLocalRandom.current().nextInt(3);
         }
         int r = ThreadLocalRandom.current().nextInt(s[3]);
         for (int i = 2; i >= 0; i--) {
