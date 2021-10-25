@@ -62,14 +62,24 @@ public class InvokersStat {
         }
 
         int get_time_out() {
-            return get_rtt() * 2;
-//            int timeout = timeout_per_second.get();
-//            int suc = suc_per_second.get();
-//            int c = concurrent.get();
-//            if (suc == 0) {
-//                suc = 1;
-//            }
-//            return (int) (1.0 * get_rtt() * (suc + timeout) / suc * (600. / c));//ms 1e-6
+//            return get_rtt() * 2;
+            int timeout = timeout_per_second.get();
+            int suc = suc_per_second.get();
+            int c = concurrent.get();
+            if (suc <= 0) {
+                suc = 1;
+            }
+            if (c <= 0) {
+                c = 1;
+            }
+            int t = (int) (1.0 * get_rtt() * (suc + timeout) / suc * (200. / c));//ms 1e-6
+            if (t > 100000) {
+                t = 100000;//100ms
+            }
+            if (t < 1000) {
+                t = 1000; //1ms
+            }
+            return t;
             //return 100;
 //            int x = timeout_acc.get();
 //            int y = get_rtt();
@@ -240,7 +250,7 @@ public class InvokersStat {
     }
 
     public int get_timout(Invoker<?> invoker) {
-        int t = 1000000;
+        int t = 100000;//100ms
         for (int i = 0; i < 3; i++) {
             int ti = a[i].get_time_out();
             if (a[i].offline_acc.get() == 0) {
