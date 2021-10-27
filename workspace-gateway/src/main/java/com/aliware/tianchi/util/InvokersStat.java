@@ -39,7 +39,7 @@ public class InvokersStat {
                 }
                 return 10;
             }
-            int x = (int) (suc_ratio * 10000);
+            int x = (int) (suc_ratio * 1000);
 
             if (x < 10) {
                 x = 10;
