@@ -26,7 +26,8 @@ public class InvokersStat {
         AtomicInteger err_per_second = new AtomicInteger(0);// 每秒清零
         AtomicInteger timeout_per_second = new AtomicInteger(0);// 每秒清零
         AtomicInteger offline_per_second = new AtomicInteger(0);// 每秒清零
-        public double suc_ratio = 0;
+        public double suc_ratio = 5;
+        public double next_weight = 200;
         public double next_timeout = 100000;
         public double rtt_period = 0;// 阶段平均
 
@@ -272,6 +273,8 @@ public class InvokersStat {
         for (int i = 0; i < 3; i++) {
             a[i].new_period();
         }
+
+        // 更新 next_weight
     }
 
     private void print(int index) {
