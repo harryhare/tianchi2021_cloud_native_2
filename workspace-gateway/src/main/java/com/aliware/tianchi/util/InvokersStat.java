@@ -27,6 +27,7 @@ public class InvokersStat {
         AtomicInteger timeout_per_second = new AtomicInteger(0);// 每秒清零
         AtomicInteger offline_per_second = new AtomicInteger(0);// 每秒清零
         public double suc_ratio = 0;
+        public double next_timeout = 100000;
         public double rtt_period = 0;// 阶段平均
 
         int weightByTimeoutRatio() {
@@ -92,7 +93,7 @@ public class InvokersStat {
             if (c <= 0) {
                 c = 1;
             }
-            int t = (int) (1.0 * get_rtt() * (suc + timeout) / suc * (400. / c));//ms 1e-6
+            int t = (int) (1.0 * get_rtt() * (suc + timeout) / suc * (200. / c));//ms 1e-6
             if (t > 100000) {
                 t = 100000;//100ms
             }
@@ -149,7 +150,7 @@ public class InvokersStat {
         void new_period() {
             int suc = suc_per_second.get();
             int err = err_per_second.get();
-            suc_ratio = 1.0 * (suc + 10) / ( err + 10);
+            suc_ratio = 1.0 * (suc + 10) / (err + 10);
             suc_per_second.set(0);
             err_per_second.set(0);
             timeout_per_second.set(0);
