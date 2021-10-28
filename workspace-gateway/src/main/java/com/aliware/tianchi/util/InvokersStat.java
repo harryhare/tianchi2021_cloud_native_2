@@ -297,7 +297,7 @@ public class InvokersStat {
                 min_err_i = i;
             }
         }
-        if (max_err_i != min_err_i) {
+        if (max_err_i != -1 && min_err_i != -1 && max_err_i != min_err_i) {
             double min_weight = Math.min(pre_weight[max_err_i], pre_weight[min_err_i]);
             double diff_err = max_err - min_err;
             double patch_err = diff_err / 2 * min_weight;
