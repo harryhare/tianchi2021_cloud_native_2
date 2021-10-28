@@ -30,6 +30,13 @@ public class InvokersStat {
         public double next_timeout = 100000;
         public double rtt_period = 0;// 阶段平均
 
+        boolean is_accessable_now() {
+            int offline = offline_acc.get();
+            int c = concurrent.get();
+            return offline == 0 || c == 0;
+        }
+
+
         int weightByTimeoutRatio() {
             int offline = offline_acc.get();
             int timeout = timeout_acc.get();
@@ -199,6 +206,31 @@ public class InvokersStat {
         }
         instance = new InvokersStat();
         instance.init_internal(invokers);
+    }
+
+
+    public int chooseByConcurrent() throws RpcException {
+        double[] w1 = new double[3];
+        double[] w2 = new double[3];
+        double[] concurrent = new double[3];
+        for (int i = 0; i < 3; i++) {
+            //p[i] = a[i].weightByConcurrent();
+            w1[i] = a[i].suc_ratio * 1000 + 1;
+            concurrent[i] = a[i].concurrent.get() + 1;
+            w2[i] = concurrent[i] / w1[i];
+        }
+        int min_i = -1;
+        double min_w2 = 999999999;
+        for (int i = 0; i < 3; i++) {
+            if (w2[i] < min_w2 && a[i].is_accessable_now()) {
+                min_i = i;
+                min_w2 = w2[i];
+            }
+        }
+        if (min_i == -1) {
+            throw new RpcException();
+        }
+        return min_i;
     }
 
     // 按照估计的容量的剩余比例分配
