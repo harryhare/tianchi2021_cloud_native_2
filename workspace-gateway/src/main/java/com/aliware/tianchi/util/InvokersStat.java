@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class InvokersStat {
     static public class InvokerStat {
         private final int rtt_array_len = 4096;
-        private final int rtt_sum_num = 32;// rtt_sum_num<<rtt_array_len
+        private final int rtt_sum_num = 64;// rtt_sum_num<<rtt_array_len
         private int[] response_time = new int[rtt_array_len]; //微秒 1e-6
         AtomicInteger response_index = new AtomicInteger(0);
         AtomicInteger last_rtt_sum = new AtomicInteger(0);//10次rtt的和
@@ -93,7 +93,7 @@ public class InvokersStat {
             if (c <= 0) {
                 c = 1;
             }
-            int t = (int) (1.0 * get_rtt() * (suc + timeout) / suc * (300. / c));//ms 1e-6
+            int t = (int) (1.0 * get_rtt() * (suc + timeout) / suc * (400. / c));//ms 1e-6
             if (t > 100000) {
                 t = 100000;//100ms
             }
