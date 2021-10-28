@@ -270,11 +270,46 @@ public class InvokersStat {
     public void period() {
         period++;
         print(period);
+
+        // 更新 next_weight
+        int max_err_i = -1;
+        double max_err = 1;
+        int min_err_i = -1;
+        double min_err = 0;
+        int[] a_timeout = {0, 0, 0};
+        int[] a_suc = {0, 0, 0};
+        int[] a_cap = {0, 0, 0};
+        double[] pre_weight = {0, 0, 0};
+        for (int i = 0; i < 3; i++) {
+            int timeout = a[i].timeout_per_second.get();
+            int suc = a[i].suc_per_second.get();
+            a_timeout[i] = timeout;
+            a_suc[i] = suc;
+            a_cap[i] = timeout + suc;
+            pre_weight[i] = a[i].next_weight;
+            double rate = 1.0 * (timeout + 1) / (suc + timeout + 1);
+            if (rate >= max_err) {
+                max_err = rate;
+                max_err_i = i;
+            }
+            if (rate <= min_err) {
+                min_err = rate;
+                min_err_i = i;
+            }
+        }
+        if (max_err_i != min_err_i) {
+            double min_weight = Math.min(pre_weight[max_err_i], pre_weight[min_err_i]);
+            double diff_err = max_err - min_err;
+            double patch_err = diff_err / 2 * min_weight;
+            a[min_err_i].next_weight += patch_err;
+            a[max_err_i].next_weight -= patch_err;
+        }
+
+        // 更新计数器
         for (int i = 0; i < 3; i++) {
             a[i].new_period();
         }
 
-        // 更新 next_weight
     }
 
     private void print(int index) {
