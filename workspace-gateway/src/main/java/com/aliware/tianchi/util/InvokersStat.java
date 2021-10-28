@@ -193,7 +193,7 @@ public class InvokersStat {
             public void run() {
                 period();
             }
-        }, 0, 1000);
+        }, 0, 500);
     }
 
     static public InvokersStat getInstance() {
