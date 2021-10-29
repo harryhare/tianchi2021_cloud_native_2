@@ -269,7 +269,7 @@ public class InvokersStat {
     }
 
 
-    private void update_next_weight(){
+    private void update_next_weight() {
         int max_err_i = -1;
         double max_err = 1;
         int min_err_i = -1;
@@ -295,15 +295,20 @@ public class InvokersStat {
                 min_err_i = i;
             }
         }
-        if (max_err_i != -1 && min_err_i != -1 && max_err_i != min_err_i) {
-            double min_weight = Math.min(pre_weight[max_err_i], pre_weight[min_err_i]);
-            double diff_err = max_err - min_err;
-            double patch_err = diff_err / 2 * min_weight;
-            a[min_err_i].next_weight += patch_err;
-            a[max_err_i].next_weight -= patch_err;
+        if (min_err_i != -1) {
+            a[min_err_i].next_weight = 500;
+            a[(min_err_i + 1) % 3].next_weight = 50;
+            a[(min_err_i + 2) % 3].next_weight = 50;
         }
-
+//        if (max_err_i != -1 && min_err_i != -1 && max_err_i != min_err_i) {
+//            double min_weight = Math.min(pre_weight[max_err_i], pre_weight[min_err_i]);
+//            double diff_err = max_err - min_err;
+//            double patch_err = diff_err / 2 * min_weight;
+//            a[min_err_i].next_weight += patch_err;
+//            a[max_err_i].next_weight -= patch_err;
+//        }
     }
+
     public void period() {
         period++;
         print(period);
