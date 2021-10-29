@@ -295,10 +295,10 @@ public class InvokersStat {
                 min_err_i = i;
             }
         }
-        if (min_err_i != -1) {
-            a[min_err_i].next_weight = 400;
-            a[(min_err_i + 1) % 3].next_weight = 100;
-            a[(min_err_i + 2) % 3].next_weight = 100;
+        if (min_err_i != -1 && max_err_i != -1 && max_err_i != min_err_i) {
+            a[min_err_i].next_weight = 450;
+            a[5 - min_err_i - max_err_i].next_weight = 100;
+            a[max_err_i].next_weight = 50;
         }
 //        if (max_err_i != -1 && min_err_i != -1 && max_err_i != min_err_i) {
 //            double min_weight = Math.min(pre_weight[max_err_i], pre_weight[min_err_i]);
