@@ -216,8 +216,8 @@ public class InvokersStat {
         double[] concurrent = new double[3];
         for (int i = 0; i < 3; i++) {
             //p[i] = a[i].weightByConcurrent();
-            //w1[i] = a[i].next_weight * 1000 + 1;
-            w1[i] = a[i].suc_ratio * 1000 + 1;
+            w1[i] = a[i].next_weight * 1000 + 1;
+            //w1[i] = a[i].suc_ratio * 1000 + 1;
             concurrent[i] = a[i].concurrent.get() + 1;
             w2[i] = concurrent[i] / w1[i];
         }
@@ -268,11 +268,8 @@ public class InvokersStat {
         return WeightedQueue.get();
     }
 
-    public void period() {
-        period++;
-        print(period);
 
-        // 更新 next_weight
+    private void update_next_weight(){
         int max_err_i = -1;
         double max_err = 1;
         int min_err_i = -1;
@@ -305,6 +302,14 @@ public class InvokersStat {
             a[min_err_i].next_weight += patch_err;
             a[max_err_i].next_weight -= patch_err;
         }
+
+    }
+    public void period() {
+        period++;
+        print(period);
+
+        // 更新 next_weight
+        update_next_weight();
 
         // 更新计数器
         for (int i = 0; i < 3; i++) {
