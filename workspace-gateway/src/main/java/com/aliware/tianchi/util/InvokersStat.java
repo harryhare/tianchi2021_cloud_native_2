@@ -103,8 +103,8 @@ public class InvokersStat {
                 c = 1;
             }
             int t = (int) (1.0 * get_rtt() * (suc + timeout) / suc * (400. / c));//ms 1e-6
-            if (t > 100000) {
-                t = 100000;//100ms
+            if (t > 1000000) {
+                t = 1000000;//100ms
             }
             if (t < 1000) {
                 t = 1000; //1ms
