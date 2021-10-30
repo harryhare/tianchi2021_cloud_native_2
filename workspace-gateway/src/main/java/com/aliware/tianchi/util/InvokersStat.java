@@ -296,8 +296,8 @@ public class InvokersStat {
             }
         }
         if (min_err_i != -1 && max_err_i != -1 && max_err_i != min_err_i) {
-            a[min_err_i].next_weight = 400;
-            a[3 - min_err_i - max_err_i].next_weight = 150;
+            a[min_err_i].next_weight = 350;
+            a[3 - min_err_i - max_err_i].next_weight = 200;
             a[max_err_i].next_weight = 50;
         }
 //        if (max_err_i != -1 && min_err_i != -1 && max_err_i != min_err_i) {
