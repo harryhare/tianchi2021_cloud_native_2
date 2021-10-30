@@ -29,7 +29,7 @@ public class InvokersStat {
         public double suc_ratio = 5;
         public double next_weight = 200;
         public int pre_rtt_index = 0;
-        public double next_timeout = 100000;
+        public int next_timeout = 100000;
         public double rtt_period = 0;// 阶段平均
 
         boolean is_accessable_now() {
@@ -92,24 +92,25 @@ public class InvokersStat {
         }
 
         int get_time_out() {
+            return next_timeout;
 //            return get_rtt() * 2;
-            int timeout = timeout_per_second.get();
-            int suc = suc_per_second.get();
-            int c = concurrent.get();
-            if (suc <= 0) {
-                suc = 1;
-            }
-            if (c <= 0) {
-                c = 1;
-            }
-            int t = (int) (1.0 * get_rtt() * (suc + timeout) / suc * (400. / c));//ms 1e-6
-            if (t > 1000000) {
-                t = 1000000;//100ms
-            }
-            if (t < 1000) {
-                t = 1000; //1ms
-            }
-            return t;
+//            int timeout = timeout_per_second.get();
+//            int suc = suc_per_second.get();
+//            int c = concurrent.get();
+//            if (suc <= 0) {
+//                suc = 1;
+//            }
+//            if (c <= 0) {
+//                c = 1;
+//            }
+//            int t = (int) (1.0 * get_rtt() * (suc + timeout) / suc * (400. / c));//ms 1e-6
+//            if (t > 100000) {
+//                t = 100000;//100ms，1000ms 时成绩特别不稳定
+//            }
+//            if (t < 1000) {
+//                t = 1000; //1ms
+//            }
+//            return t;
             //return 100;
 //            int x = timeout_acc.get();
 //            int y = get_rtt();
@@ -172,8 +173,8 @@ public class InvokersStat {
             }
             if (n != 0) {
                 int t = (int) (1.0 * get_rtt() * (suc + timeout) / suc * (400. / c));//ms 1e-6
-                if (t > 1000000) {
-                    t = 1000000;//100ms
+                if (t > 100000) {
+                    t = 100000;//100ms
                 }
                 if (t < 1000) {
                     t = 1000; //1ms
