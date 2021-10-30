@@ -105,3 +105,7 @@ CompletableFuture<Integer> x = CompletableFuture.supplyAsync(() -> {
 asyncRpcResult.setValue(x);
 return asyncRpcResult;
 ```
+
+## 耗时
+由于consumer 和 provider 往返的时间没有测，现在猜测是0.3ms
+https://zhuanlan.zhihu.com/p/99837672
