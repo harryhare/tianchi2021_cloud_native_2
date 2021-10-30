@@ -216,8 +216,8 @@ public class InvokersStat {
         double[] concurrent = new double[3];
         for (int i = 0; i < 3; i++) {
             //p[i] = a[i].weightByConcurrent();
-            w1[i] = a[i].next_weight * 1000 + 1;
-            //w1[i] = a[i].suc_ratio * 1000 + 1;
+            //w1[i] = a[i].next_weight * 1000 + 1;
+            w1[i] = Math.pow(a[i].suc_ratio, 1.25) * 1000 + 1;
             concurrent[i] = a[i].concurrent.get() + 1;
             w2[i] = concurrent[i] / w1[i];
         }
@@ -295,6 +295,11 @@ public class InvokersStat {
                 min_err_i = i;
             }
         }
+//        if (min_err_i != -1 && max_err_i != -1 && max_err_i != min_err_i) {
+//            a[min_err_i].next_weight = pre_weight[min_err_i].;
+//            a[3 - min_err_i - max_err_i].next_weight = 250;
+//            a[max_err_i].next_weight = 50;
+//        }
         if (min_err_i != -1 && max_err_i != -1 && max_err_i != min_err_i) {
             a[min_err_i].next_weight = 300;
             a[3 - min_err_i - max_err_i].next_weight = 250;
