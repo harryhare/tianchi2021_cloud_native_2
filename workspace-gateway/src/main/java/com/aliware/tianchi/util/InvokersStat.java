@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class InvokersStat {
     static public class InvokerStat {
-        private final int rtt_array_len = 4096;
+        private final int rtt_array_len = 81920;
         private final int rtt_sum_num = 64;// rtt_sum_num<<rtt_array_len
         private int[] response_time = new int[rtt_array_len]; //微秒 1e-6
         AtomicInteger response_index = new AtomicInteger(0);
@@ -28,6 +28,7 @@ public class InvokersStat {
         AtomicInteger offline_per_second = new AtomicInteger(0);// 每秒清零
         public double suc_ratio = 5;
         public double next_weight = 200;
+        public int pre_rtt_index = 0;
         public double next_timeout = 100000;
         public double rtt_period = 0;// 阶段平均
 
@@ -157,8 +158,28 @@ public class InvokersStat {
 
         void new_period() {
             int suc = suc_per_second.get();
+            int timeout = timeout_per_second.get();
             int err = err_per_second.get();
+            int c = concurrent.get();
             suc_ratio = 1.0 * (suc + 10) / (err + 10);
+            int i = pre_rtt_index;
+            int j = response_index.get();
+            long sum = 0;
+            long n = 0;
+            for (; i != j; i = (i + 1) % rtt_array_len) {
+                sum += response_time[i];
+                n++;
+            }
+            if (n != 0) {
+                int t = (int) (1.0 * get_rtt() * (suc + timeout) / suc * (400. / c));//ms 1e-6
+                if (t > 1000000) {
+                    t = 1000000;//100ms
+                }
+                if (t < 1000) {
+                    t = 1000; //1ms
+                }
+                next_timeout = t;
+            }
             suc_per_second.set(0);
             err_per_second.set(0);
             timeout_per_second.set(0);
@@ -217,7 +238,8 @@ public class InvokersStat {
         for (int i = 0; i < 3; i++) {
             //p[i] = a[i].weightByConcurrent();
             //w1[i] = a[i].next_weight * 1000 + 1;
-            w1[i] = Math.pow(a[i].suc_ratio, 0.9) * 1000 + 1;
+            //w1[i] = Math.pow(a[i].suc_ratio, 0.9) * 1000 + 1;
+            w1[i] = a[i].suc_ratio * 1000 + 1;
             concurrent[i] = a[i].concurrent.get() + 1;
             w2[i] = concurrent[i] / w1[i];
         }
