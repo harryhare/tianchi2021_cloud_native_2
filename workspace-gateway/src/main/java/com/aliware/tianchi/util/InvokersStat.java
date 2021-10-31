@@ -164,7 +164,7 @@ public class InvokersStat {
             int c = concurrent.get();
             suc_ratio = 1.0 * (suc + 10) / (err + 10);
             int i = pre_rtt_index;
-            int j = response_index.get();
+            int j = response_index.get()%rtt_array_len;
             long sum = 0;
             long n = 0;
             for (; i != j; i = (i + 1) % rtt_array_len) {
@@ -196,6 +196,21 @@ public class InvokersStat {
     private Map<Integer, InvokerStat> m = new HashMap<>();
     private Map<Integer, Integer> m2 = new HashMap<>();
     private static InvokersStat instance = null;
+
+    static synchronized public void mock_init() {
+        LOGGER.info("init");
+        if (instance != null) {
+            return;
+        }
+        instance = new InvokersStat();
+        instance.mock_init_internal();
+    }
+
+    public void mock_init_internal() {
+        for (int i = 0; i < 3; i++) {
+            a[i] = new InvokerStat();
+        }
+    }
 
     private <T> void init_internal(List<Invoker<T>> invokers) {
         LOGGER.info("init_internal");
@@ -368,21 +383,6 @@ public class InvokersStat {
         );
     }
 
-    public void invoke(int id) {
-        a[id].invoke();
-    }
-
-    public void ok(int id, int duration) {
-        a[id].ok(duration);
-    }
-
-    public void err(int id, ErrorType t) {
-        a[id].err(t);
-    }
-
-    private static int get_invoker_key(Invoker<?> invoker) {
-        return invoker.getUrl().getPort();
-    }
 
     public int get_timout(Invoker<?> invoker) {
         int t = 100000;//100ms
@@ -395,32 +395,6 @@ public class InvokersStat {
         return t;
     }
 
-    public int get_avg_rtt() {
-        int sum = 0;
-        int n = 0;
-        for (int i = 0; i < 3; i++) {
-            if (a[i].offline_acc.get() == 0) {
-                int ti = a[i].get_time_out(); //1e-6
-                sum += ti;
-                n++;
-            }
-        }
-        if (n == 0) {
-            return 1000;
-        }
-        return sum / n;
-    }
-
-    public void invoke(Invoker<?> invoker) {
-        m.get(get_invoker_key(invoker)).invoke();
-    }
-
-    public void ok(Invoker<?> invoker, int duration) {//1e-6
-        int i = m2.get(get_invoker_key(invoker));
-        boolean good = duration < get_avg_rtt();//1e-6
-        WeightedQueue.ok(i, duration, good);
-        a[i].ok(duration);
-    }
 
     public enum ErrorType {
         OTHER,
@@ -428,9 +402,37 @@ public class InvokersStat {
         OFFLINE,
     }
 
+    private static int get_invoker_key(Invoker<?> invoker) {
+        return invoker.getUrl().getPort();
+    }
+
+    public void invoke(int id) {
+        a[id].invoke();
+    }
+
+    public void ok(int id, int duration) {
+        boolean good = duration < 3000;//1e-6
+        WeightedQueue.ok(id, duration, good);
+        a[id].ok(duration);
+    }
+
+    public void err(int id, ErrorType t) {
+        WeightedQueue.err(id, t);
+        a[id].err(t);
+    }
+
+    public void invoke(Invoker<?> invoker) {
+        int i = m2.get(get_invoker_key(invoker));
+        invoke(i);
+    }
+
+    public void ok(Invoker<?> invoker, int duration) {//1e-6
+        int i = m2.get(get_invoker_key(invoker));
+        ok(i, duration);
+    }
+
     public void err(Invoker<?> invoker, ErrorType t) {
         int i = m2.get(get_invoker_key(invoker));
-        WeightedQueue.err(i, t);
-        m.get(get_invoker_key(invoker)).err(t);
+        err(i, t);
     }
 }

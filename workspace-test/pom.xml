@@ -17,6 +17,10 @@
             <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.aliware.tianchi</groupId>
+            <artifactId>workspace-gateway</artifactId>
+        </dependency>
     </dependencies>
 
 
