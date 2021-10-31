@@ -30,11 +30,11 @@ public class Mock10 {
             int id = 0;
             int timeout_counter = 0;
             int success_counter = 0;
-            int last_mark_time=0;
+            int last_mark_time = 0;
             while (global_time <= test_time) {
                 // 调用invoker 的period ，并且输出log 记录进展
-                if (((int)global_time/1000-last_mark_time)>=1){
-                    last_mark_time=(int)global_time/1000;
+                if (((int) global_time / 1000 - last_mark_time) >= 1) {
+                    last_mark_time = (int) global_time / 1000;
                     invoker.period();
                     //System.out.printf("processing 00:%02d\n",last_mark_time);
                 }
@@ -80,12 +80,12 @@ public class Mock10 {
                 }
 
                 // 调用
-                int r = ThreadLocalRandom.current().nextInt(3);// 10_281_296/12_853_557
-                //int r = ThreadLocalRandom.current().nextInt(invokers.size());
-                //int r = InvokersStat.getInstance().chooseByWeight();
+                //int r = ThreadLocalRandom.current().nextInt(3);// 10_281_296/12_853_557
+                int r = InvokersStat.getInstance().chooseByWeight(); //12_574_883/14_917_826
                 //int r = invoker.chooseByConcurrent();
                 //int r = InvokersStat.getInstance().chooseByQueue();
                 providers[r].invoke(id);
+                invoker.invoke(r);
                 wait.put(id, r);
                 timeout_queue.add(new Request(id, global_time + 10, 10));
                 id++;
