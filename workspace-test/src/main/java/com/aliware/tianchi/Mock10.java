@@ -5,6 +5,7 @@ import com.aliware.tianchi.util.InvokersStat;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
+// 代入提交代码中的 测试类
 public class Mock10 {
     static double global_time = 0;
 
@@ -80,14 +81,15 @@ public class Mock10 {
                 }
 
                 // 调用
+                //int r = 0;// 17_050_547/18_945_963
                 //int r = ThreadLocalRandom.current().nextInt(3);// 10_281_296/12_853_557
-                int r = InvokersStat.getInstance().chooseByWeight(); //12_574_883/14_917_826
-                //int r = invoker.chooseByConcurrent();
-                //int r = InvokersStat.getInstance().chooseByQueue();
+                //int r = InvokersStat.getInstance().chooseByWeight(); //12_574_883/14_917_826
+                //int r = invoker.chooseByConcurrent(); // 13_713_870/15_942_934
+                int r = InvokersStat.getInstance().chooseByQueue(); // 13690701 // 15_922055
                 providers[r].invoke(id);
                 invoker.invoke(r);
                 wait.put(id, r);
-                timeout_queue.add(new Request(id, global_time + 10, 10));
+                timeout_queue.add(new Request(id, global_time + 10, 5000000));
                 id++;
                 connection++;
             }

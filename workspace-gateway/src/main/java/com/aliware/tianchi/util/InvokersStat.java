@@ -92,25 +92,25 @@ public class InvokersStat {
         }
 
         int get_time_out() {
-            return next_timeout;
+//            return next_timeout;
 //            return get_rtt() * 2;
-//            int timeout = timeout_per_second.get();
-//            int suc = suc_per_second.get();
-//            int c = concurrent.get();
-//            if (suc <= 0) {
-//                suc = 1;
-//            }
-//            if (c <= 0) {
-//                c = 1;
-//            }
-//            int t = (int) (1.0 * get_rtt() * (suc + timeout) / suc * (400. / c));//ms 1e-6
-//            if (t > 100000) {
-//                t = 100000;//100ms，1000ms 时成绩特别不稳定
-//            }
-//            if (t < 1000) {
-//                t = 1000; //1ms
-//            }
-//            return t;
+            int timeout = timeout_per_second.get();
+            int suc = suc_per_second.get();
+            int c = concurrent.get();
+            if (suc <= 0) {
+                suc = 1;
+            }
+            if (c <= 0) {
+                c = 1;
+            }
+            int t = (int) (1.0 * get_rtt() * (suc + timeout) / suc * (400. / c));//ms 1e-6
+            if (t > 100000) {
+                t = 100000;//100ms，1000ms 时成绩特别不稳定
+            }
+            if (t < 1000) {
+                t = 1000; //1ms
+            }
+            return t;
             //return 100;
 //            int x = timeout_acc.get();
 //            int y = get_rtt();
@@ -164,17 +164,18 @@ public class InvokersStat {
             int c = concurrent.get();
             suc_ratio = 1.0 * (suc + 10) / (err + 10);
             int i = pre_rtt_index;
-            int j = response_index.get()%rtt_array_len;
+            int j = response_index.get();
+            pre_rtt_index = j;
             long sum = 0;
             long n = 0;
-            for (; i != j; i = (i + 1) % rtt_array_len) {
-                sum += response_time[i];
+            for (; i != j; i++) {
+                sum += response_time[i % rtt_array_len];
                 n++;
             }
             if (n != 0) {
                 int t = (int) (1.0 * get_rtt() * (suc + timeout) / suc * (400. / c));//ms 1e-6
-                if (t > 100000) {
-                    t = 100000;//100ms
+                if (t > 1000000) {
+                    t = 1000000;//100ms
                 }
                 if (t < 1000) {
                     t = 1000; //1ms
@@ -187,7 +188,6 @@ public class InvokersStat {
             offline_per_second.set(0);
         }
     }
-
     private static final Logger LOGGER = LoggerFactory.getLogger(InvokersStat.class);
     private static Timer timer = new Timer();
     private static int period = 0;
@@ -196,6 +196,7 @@ public class InvokersStat {
     private Map<Integer, InvokerStat> m = new HashMap<>();
     private Map<Integer, Integer> m2 = new HashMap<>();
     private static InvokersStat instance = null;
+    public int pre_min_err_index = 0;
 
     static synchronized public void mock_init() {
         LOGGER.info("init");
@@ -309,9 +310,9 @@ public class InvokersStat {
 
     private void update_next_weight() {
         int max_err_i = -1;
-        double max_err = 1;
+        double max_err = 0;
         int min_err_i = -1;
-        double min_err = 0;
+        double min_err = 1;
         int[] a_timeout = {0, 0, 0};
         int[] a_suc = {0, 0, 0};
         int[] a_cap = {0, 0, 0};
@@ -350,6 +351,7 @@ public class InvokersStat {
 //            a[min_err_i].next_weight += patch_err;
 //            a[max_err_i].next_weight -= patch_err;
 //        }
+        pre_min_err_index = min_err_i;
     }
 
     public void period() {
@@ -412,12 +414,13 @@ public class InvokersStat {
 
     public void ok(int id, int duration) {
         boolean good = duration < 3000;//1e-6
-        WeightedQueue.ok(id, duration, good);
+        //WeightedQueue.ok(id, duration, good);
         a[id].ok(duration);
     }
 
     public void err(int id, ErrorType t) {
-        WeightedQueue.err(id, t);
+        //int subside = chooseByConcurrent();
+        //WeightedQueue.err(id, t, subside);
         a[id].err(t);
     }
 
