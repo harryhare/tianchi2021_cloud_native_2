@@ -310,9 +310,9 @@ public class InvokersStat {
 
     private void update_next_weight() {
         int max_err_i = -1;
-        double max_err = 1;
+        double max_err = 0;
         int min_err_i = -1;
-        double min_err = 0;
+        double min_err = 1;
         int[] a_timeout = {0, 0, 0};
         int[] a_suc = {0, 0, 0};
         int[] a_cap = {0, 0, 0};
@@ -340,8 +340,8 @@ public class InvokersStat {
 //            a[max_err_i].next_weight = 50;
 //        }
         if (min_err_i != -1 && max_err_i != -1 && max_err_i != min_err_i) {
-            a[min_err_i].next_weight = 300;
-            a[3 - min_err_i - max_err_i].next_weight = 250;
+            a[min_err_i].next_weight = 400;
+            a[3 - min_err_i - max_err_i].next_weight = 50;
             a[max_err_i].next_weight = 50;
         }
 //        if (max_err_i != -1 && min_err_i != -1 && max_err_i != min_err_i) {
