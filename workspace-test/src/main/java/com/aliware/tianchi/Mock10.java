@@ -21,6 +21,9 @@ public class Mock10 {
         public void init() {
             InvokersStat.mock_init();
             invoker = InvokersStat.getInstance();
+//            providers[0] = new MockProvider(1.045, 0.2);
+//            providers[1] = new MockProvider(1.03, 0.1);
+//            providers[2] = new MockProvider(1.015, 0.15);
             providers[0] = new MockProvider(1, 0.1);
             providers[1] = new MockProvider(1, 0.2);
             providers[2] = new MockProvider(1, 0.3);
@@ -112,8 +115,11 @@ public class Mock10 {
         }
 
         public double get_rtt() {
-            //return ThreadLocalRandom.current().nextDouble(5);//ms
-            return 1;
+            //return ThreadLocalRandom.current().nextDouble(10);//ms
+            //return 1;
+            double a = ThreadLocalRandom.current().nextDouble(0.6, 1.4);
+            double b = ThreadLocalRandom.current().nextDouble();
+            return Math.pow(index * a, q.size()) * Math.pow(q.size(), 0.5) * b;
         }
 
         public double peek() {

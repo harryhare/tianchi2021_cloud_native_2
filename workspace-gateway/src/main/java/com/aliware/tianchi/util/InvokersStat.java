@@ -336,6 +336,22 @@ public class InvokersStat {
         return WeightedQueue.get();
     }
 
+    public static void format(double[] a) {
+        int s = 0;
+        for (int i = 0; i < 3; i++) {
+            s += a[i];
+        }
+        if (s == 0) {
+            for (int i = 0; i < 3; i++) {
+                a[i] = 200;
+            }
+        } else {
+            for (int i = 0; i < 3; i++) {
+                a[i] = 600 * a[i] / s;
+            }
+        }
+
+    }
 
     private void update_next_weight() {
         int max_err_i = -1;
@@ -363,11 +379,11 @@ public class InvokersStat {
                 min_err_i = i;
             }
         }
-        if (min_err_i != -1 && max_err_i != -1 && max_err_i != min_err_i) {
-            a[min_err_i].next_weight = 250;
-            a[3 - min_err_i - max_err_i].next_weight = 200;
-            a[max_err_i].next_weight = 150;
-        }
+//        if (min_err_i != -1 && max_err_i != -1 && max_err_i != min_err_i) {
+//            a[min_err_i].next_weight = 250;
+//            a[3 - min_err_i - max_err_i].next_weight = 200;
+//            a[max_err_i].next_weight = 150;
+//        }
 //        if (max_err_i != -1 && min_err_i != -1 && max_err_i != min_err_i) {
 //            double min_weight = Math.min(pre_weight[max_err_i], pre_weight[min_err_i]);
 //            double diff_err = max_err - min_err;
@@ -381,6 +397,14 @@ public class InvokersStat {
 //            a[3 - min_err_i - max_err_i].next_weight += patch_err * 1;
 //            a[max_err_i].next_weight -= patch_err * 3;
 //        }
+        if (max_err_i != -1 && min_err_i != -1 && max_err_i != min_err_i) {
+            pre_weight[min_err_i] *= 1.2;
+            pre_weight[max_err_i] *= 0.8;
+            format(pre_weight);
+            for (int i = 0; i < 3; i++) {
+                a[i].next_weight = pre_weight[i];
+            }
+        }
         pre_min_err_index = min_err_i;
     }
 
