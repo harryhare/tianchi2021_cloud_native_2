@@ -335,22 +335,17 @@ public class InvokersStat {
             }
         }
 //        if (min_err_i != -1 && max_err_i != -1 && max_err_i != min_err_i) {
-//            a[min_err_i].next_weight = pre_weight[min_err_i].;
-//            a[3 - min_err_i - max_err_i].next_weight = 250;
+//            a[min_err_i].next_weight = 400;
+//            a[3 - min_err_i - max_err_i].next_weight = 50;
 //            a[max_err_i].next_weight = 50;
 //        }
-        if (min_err_i != -1 && max_err_i != -1 && max_err_i != min_err_i) {
-            a[min_err_i].next_weight = 400;
-            a[3 - min_err_i - max_err_i].next_weight = 50;
-            a[max_err_i].next_weight = 50;
+        if (max_err_i != -1 && min_err_i != -1 && max_err_i != min_err_i) {
+            double min_weight = Math.min(pre_weight[max_err_i], pre_weight[min_err_i]);
+            double diff_err = max_err - min_err;
+            double patch_err = diff_err / 2 * min_weight;
+            a[min_err_i].next_weight += patch_err;
+            a[max_err_i].next_weight -= patch_err;
         }
-//        if (max_err_i != -1 && min_err_i != -1 && max_err_i != min_err_i) {
-//            double min_weight = Math.min(pre_weight[max_err_i], pre_weight[min_err_i]);
-//            double diff_err = max_err - min_err;
-//            double patch_err = diff_err / 2 * min_weight;
-//            a[min_err_i].next_weight += patch_err;
-//            a[max_err_i].next_weight -= patch_err;
-//        }
         pre_min_err_index = min_err_i;
     }
 
