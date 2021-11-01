@@ -188,6 +188,7 @@ public class InvokersStat {
             offline_per_second.set(0);
         }
     }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(InvokersStat.class);
     private static Timer timer = new Timer();
     private static int period = 0;
@@ -247,6 +248,33 @@ public class InvokersStat {
         instance.init_internal(invokers);
     }
 
+    public int chooseByError() throws RpcException {
+        int[] suc = new int[3];
+        int[] err = new int[3];
+        double[] suc_ratio = new double[3];
+        int total_suc = 0;
+        for (int i = 0; i < 3; i++) {
+            suc[i] = a[i].suc_per_second.get();
+            err[i] = a[i].timeout_per_second.get();
+            suc_ratio[i] = (suc[i] + 1) / (err[i] + 1) + ThreadLocalRandom.current().nextDouble();
+            total_suc += suc[i];
+        }
+        if (total_suc < 1000) {
+            return chooseByConcurrent();
+        }
+        int max_i = -1;
+        double max_ratio = 0;
+        for (int i = 0; i < 3; i++) {
+            if (suc_ratio[i] >= max_ratio && a[i].is_accessable_now()) {
+                max_i = i;
+                max_ratio = suc_ratio[i];
+            }
+        }
+        if (max_i == -1) {
+            throw new RpcException();
+        }
+        return max_i;
+    }
 
     public int chooseByConcurrent() throws RpcException {
         double[] w1 = new double[3];
@@ -255,6 +283,7 @@ public class InvokersStat {
         for (int i = 0; i < 3; i++) {
             //p[i] = a[i].weightByConcurrent();
             w1[i] = a[i].next_weight * 1000 + 1;
+            //w1[i] = 200 * 1000 + 1;
             //w1[i] = Math.pow(a[i].suc_ratio, 0.9) * 1000 + 1;
             //w1[i] = a[i].suc_ratio * 1000 + 1;
             concurrent[i] = a[i].concurrent.get() + 1;
@@ -334,18 +363,24 @@ public class InvokersStat {
                 min_err_i = i;
             }
         }
-//        if (min_err_i != -1 && max_err_i != -1 && max_err_i != min_err_i) {
-//            a[min_err_i].next_weight = 400;
-//            a[3 - min_err_i - max_err_i].next_weight = 50;
-//            a[max_err_i].next_weight = 50;
-//        }
-        if (max_err_i != -1 && min_err_i != -1 && max_err_i != min_err_i) {
-            double min_weight = Math.min(pre_weight[max_err_i], pre_weight[min_err_i]);
-            double diff_err = max_err - min_err;
-            double patch_err = diff_err / 2 * min_weight;
-            a[min_err_i].next_weight += patch_err;
-            a[max_err_i].next_weight -= patch_err;
+        if (min_err_i != -1 && max_err_i != -1 && max_err_i != min_err_i) {
+            a[min_err_i].next_weight = 250;
+            a[3 - min_err_i - max_err_i].next_weight = 200;
+            a[max_err_i].next_weight = 150;
         }
+//        if (max_err_i != -1 && min_err_i != -1 && max_err_i != min_err_i) {
+//            double min_weight = Math.min(pre_weight[max_err_i], pre_weight[min_err_i]);
+//            double diff_err = max_err - min_err;
+//            double patch_err = diff_err / 2 * min_weight;
+//            a[min_err_i].next_weight += patch_err;
+//            a[max_err_i].next_weight -= patch_err;
+//        }
+//        if (max_err_i != -1 && min_err_i != -1 && max_err_i != min_err_i) {
+//            double patch_err = pre_weight[max_err_i] / 4;
+//            a[min_err_i].next_weight += patch_err * 2;
+//            a[3 - min_err_i - max_err_i].next_weight += patch_err * 1;
+//            a[max_err_i].next_weight -= patch_err * 3;
+//        }
         pre_min_err_index = min_err_i;
     }
 
