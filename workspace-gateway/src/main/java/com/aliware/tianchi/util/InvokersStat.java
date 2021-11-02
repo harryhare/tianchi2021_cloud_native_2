@@ -279,13 +279,13 @@ public class InvokersStat {
     }
 
     public int chooseByConcurrent() throws RpcException {
-        Integer rr = q.poll();
-        while (rr != null) {
-            if (a[rr].is_accessable_now()) {
-                return rr;
-            }
-            rr=q.poll();
-        }
+//        Integer rr = q.poll();
+//        while (rr != null) {
+//            if (a[rr].is_accessable_now()) {
+//                return rr;
+//            }
+//            rr=q.poll();
+//        }
 
         double[] w1 = new double[3];
         double[] w2 = new double[3];
@@ -452,7 +452,7 @@ public class InvokersStat {
                 a[0].offline_per_second.get(), a[1].offline_per_second.get(), a[2].offline_per_second.get(),
                 a[0].concurrent.get(), a[1].concurrent.get(), a[2].concurrent.get(),
                 a[0].get_rtt(), a[1].get_rtt(), a[2].get_rtt(),
-                WeightedQueue.q.size()
+                q.size()
         );
     }
 
@@ -486,9 +486,9 @@ public class InvokersStat {
     public void ok(int id, int duration) {
         boolean good = duration < 2000;//1e-6
         //WeightedQueue.ok(id, duration, good);
-        if (good) {
-            q.add(id);
-        }
+//        if (good) {
+//            q.add(id);
+//        }
         a[id].ok(duration);
     }
 
