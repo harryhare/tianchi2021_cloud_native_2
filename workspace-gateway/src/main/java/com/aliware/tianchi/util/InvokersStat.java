@@ -253,12 +253,14 @@ public class InvokersStat {
     public int chooseByError() throws RpcException {
         int[] suc = new int[3];
         int[] err = new int[3];
+        int[] cur = new int[3];
         double[] suc_ratio = new double[3];
         int total_suc = 0;
         for (int i = 0; i < 3; i++) {
             suc[i] = a[i].suc_per_second.get();
             err[i] = a[i].timeout_per_second.get();
-            suc_ratio[i] = (suc[i] + 1) / (err[i] + 1) + ThreadLocalRandom.current().nextDouble();
+            cur[i] = a[i].concurrent.get();
+            suc_ratio[i] = 1.0 * (suc[i] + 10) / (err[i] + 10 + cur[i]);
             total_suc += suc[i];
         }
         if (total_suc < 1000) {
@@ -409,17 +411,17 @@ public class InvokersStat {
 //            a[3 - min_err_i - max_err_i].next_weight += patch_err * 1;
 //            a[max_err_i].next_weight -= patch_err * 3;
 //        }
-//        if (max_err_i != -1 && min_err_i != -1 && max_err_i != min_err_i) {
-//            double x = err_precent[max_err_i] - err_precent[min_err_i];
-//            if (x > 0.05) {
-//                pre_weight[min_err_i] *= (1 + x);
-//                pre_weight[max_err_i] *= (1 - x);
-//                format(pre_weight);
-//                for (int i = 0; i < 3; i++) {
-//                    a[i].next_weight = pre_weight[i];
-//                }
-//            }
-//        }
+        if (max_err_i != -1 && min_err_i != -1 && max_err_i != min_err_i) {
+            double x = err_precent[max_err_i] - err_precent[min_err_i];
+            if (x > 0.05) {
+                pre_weight[min_err_i] *= (1 + x);
+                pre_weight[max_err_i] *= (1 - x);
+                format(pre_weight);
+                for (int i = 0; i < 3; i++) {
+                    a[i].next_weight = pre_weight[i];
+                }
+            }
+        }
 //        System.out.printf("%.2f,%.2f,%.2f\n",err_precent[0],err_precent[1],err_precent[2]);
 //        System.out.printf("%.0f,%.0f,%.0f\n",pre_weight[0],pre_weight[1],pre_weight[2]);
         pre_min_err_index = min_err_i;

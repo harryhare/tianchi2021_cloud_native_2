@@ -87,8 +87,8 @@ public class Mock10 {
                 //int r = 0;// 17_050_547/18_945_963
                 //int r = ThreadLocalRandom.current().nextInt(3);// 10_281_296/12_853_557
                 //int r = InvokersStat.getInstance().chooseByWeight(); //12_574_883/14_917_826
-                int r = invoker.chooseByConcurrent(); // 350/200/50: 13_713_870/15_942_934, 400/50/50: 15_276647/17_349421
-                //int r = InvokersStat.getInstance().chooseByError();
+                //int r = invoker.chooseByConcurrent(); // 350/200/50: 13_713_870/15_942_934, 400/50/50: 15_276647/17_349421
+                int r = InvokersStat.getInstance().chooseByError();
                 //int r = InvokersStat.getInstance().chooseByQueue(); // 13690701 // 15_922055
                 providers[r].invoke(id);
                 invoker.invoke(r);
