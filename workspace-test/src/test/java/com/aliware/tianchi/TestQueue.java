@@ -5,10 +5,24 @@ import org.junit.Test;
 
 import java.util.Comparator;
 import java.util.PriorityQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.PriorityBlockingQueue;
 
 public class TestQueue {
+    @Test
+    public void test0() {
+        ConcurrentLinkedQueue<Integer> q = new ConcurrentLinkedQueue<>();
+        q.add(1);
+        q.add(2);
+        q.add(3);
+        q.add(1);
+        System.out.println(q.poll());
+        System.out.println(q.poll());
+        System.out.println(q.poll());
+        System.out.println(q.poll());
+    }
+
     @Test
     public void test() {
         ConcurrentSkipListSet<Integer> q = new ConcurrentSkipListSet<>();

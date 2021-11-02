@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -196,6 +197,7 @@ public class InvokersStat {
     private InvokerStat[] a = new InvokerStat[3];
     private Map<Integer, InvokerStat> m = new HashMap<>();
     private Map<Integer, Integer> m2 = new HashMap<>();
+    private Queue<Integer> q = new ConcurrentLinkedQueue<>();
     private static InvokersStat instance = null;
     public int pre_min_err_index = 0;
 
@@ -277,15 +279,23 @@ public class InvokersStat {
     }
 
     public int chooseByConcurrent() throws RpcException {
+        Integer rr = q.poll();
+        while (rr != null) {
+            if (a[rr].is_accessable_now()) {
+                return rr;
+            }
+            rr=q.poll();
+        }
+
         double[] w1 = new double[3];
         double[] w2 = new double[3];
         double[] concurrent = new double[3];
         for (int i = 0; i < 3; i++) {
             //p[i] = a[i].weightByConcurrent();
-            w1[i] = a[i].next_weight * 1000 + 1;
+            //w1[i] = a[i].next_weight * 1000 + 1;
             //w1[i] = 200 * 1000 + 1;
             //w1[i] = Math.pow(a[i].suc_ratio, 0.9) * 1000 + 1;
-            //w1[i] = a[i].suc_ratio * 1000 + 1;
+            w1[i] = a[i].suc_ratio * 1000 + 1;
             concurrent[i] = a[i].concurrent.get() + 1;
             w2[i] = concurrent[i] / w1[i];
         }
@@ -361,6 +371,7 @@ public class InvokersStat {
         int[] a_timeout = {0, 0, 0};
         int[] a_suc = {0, 0, 0};
         int[] a_cap = {0, 0, 0};
+        double[] err_precent = {0, 0, 0};
         double[] pre_weight = {0, 0, 0};
         for (int i = 0; i < 3; i++) {
             int timeout = a[i].timeout_per_second.get();
@@ -370,6 +381,7 @@ public class InvokersStat {
             a_cap[i] = timeout + suc;
             pre_weight[i] = a[i].next_weight;
             double rate = 1.0 * (timeout + 1) / (suc + timeout + 1);
+            err_precent[i] = rate;
             if (rate >= max_err) {
                 max_err = rate;
                 max_err_i = i;
@@ -397,14 +409,19 @@ public class InvokersStat {
 //            a[3 - min_err_i - max_err_i].next_weight += patch_err * 1;
 //            a[max_err_i].next_weight -= patch_err * 3;
 //        }
-        if (max_err_i != -1 && min_err_i != -1 && max_err_i != min_err_i) {
-            pre_weight[min_err_i] *= 1.2;
-            pre_weight[max_err_i] *= 0.8;
-            format(pre_weight);
-            for (int i = 0; i < 3; i++) {
-                a[i].next_weight = pre_weight[i];
-            }
-        }
+//        if (max_err_i != -1 && min_err_i != -1 && max_err_i != min_err_i) {
+//            double x = err_precent[max_err_i] - err_precent[min_err_i];
+//            if (x > 0.05) {
+//                pre_weight[min_err_i] *= (1 + x);
+//                pre_weight[max_err_i] *= (1 - x);
+//                format(pre_weight);
+//                for (int i = 0; i < 3; i++) {
+//                    a[i].next_weight = pre_weight[i];
+//                }
+//            }
+//        }
+//        System.out.printf("%.2f,%.2f,%.2f\n",err_precent[0],err_precent[1],err_precent[2]);
+//        System.out.printf("%.0f,%.0f,%.0f\n",pre_weight[0],pre_weight[1],pre_weight[2]);
         pre_min_err_index = min_err_i;
     }
 
@@ -469,6 +486,9 @@ public class InvokersStat {
     public void ok(int id, int duration) {
         boolean good = duration < 3000;//1e-6
         //WeightedQueue.ok(id, duration, good);
+        if (good) {
+            q.add(id);
+        }
         a[id].ok(duration);
     }
 
