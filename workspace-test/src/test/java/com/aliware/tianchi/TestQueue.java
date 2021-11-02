@@ -21,6 +21,7 @@ public class TestQueue {
         System.out.println(q.poll());
         System.out.println(q.poll());
         System.out.println(q.poll());
+        System.out.println(q.poll());
     }
 
     @Test

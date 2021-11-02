@@ -484,7 +484,7 @@ public class InvokersStat {
     }
 
     public void ok(int id, int duration) {
-        boolean good = duration < 3000;//1e-6
+        boolean good = duration < 2000;//1e-6
         //WeightedQueue.ok(id, duration, good);
         if (good) {
             q.add(id);
